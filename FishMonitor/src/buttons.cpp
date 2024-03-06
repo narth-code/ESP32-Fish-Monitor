@@ -30,15 +30,15 @@ void ButtonHandler::performAction() {
     // Perform action based on button ID
     switch(id) {
         case 1:
-          readTemp();
+          //readTemp();
           Serial.println("SW1 Pressed!");
           break;
         case 2:
-          readLevel();
+          //readLevel();
           Serial.println("SW2 Pressed!");
           break;
         case 3:
-          readPH();
+          //readPH();
           Serial.println("SW3 Pressed!");
           break;           
         default:
