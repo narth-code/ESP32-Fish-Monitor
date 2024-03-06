@@ -48,22 +48,23 @@ void checkBluetooth() {
       val_byte2 = incoming;             // write second data byte (LSB)
       float value = 128*val_byte1 + val_byte2;          // recombine the first and second data byte to the actual value that was sent from the phone
       // here is the location that you can implement the code what you want to do with the controller id and value received from the phone
+      value =0;
       switch (id) {
           case 1:  
             feed();
-            value = readPH();
+            //value = readPH();
             Serial.print("Measured: "); Serial.print(value); Serial.print("\t");
             value = round(value * 100);
             Serial.print("Button 1 (PH): "); Serial.println(value);
             break;
           case 2:  
-            value = readTemp();
+            //value = readTemp();
             Serial.print("Measured: "); Serial.print(value); Serial.print("\t");
             value *= 10;
             Serial.print("Button 2 (Temp): "); Serial.println(value);
             break;
           case 3: 
-            value = readLevel(); 
+            //value = readLevel(); 
             Serial.print("Measured: "); Serial.print(value); Serial.print("\t");
 
             Serial.print("Button 3 (Level): "); Serial.println(value);
