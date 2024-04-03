@@ -5,7 +5,7 @@ OneWire oneWire(ONE_WIRE_BUS);
 
 // Pass oneWire reference to DallasTemperature library
 DallasTemperature tempSensor(&oneWire);
-int value = 0;
+float data[4] = {75,7.1,0,14};
 
 
 void setupSensors() {
@@ -21,8 +21,10 @@ void readSensors() {
   digitalWrite(POWER_PIN, HIGH);  // turn the sensor ON
   
   tempSensor.requestTemperatures(); 
-  float tempF = tempSensor.getTempFByIndex(0);
-  tempF = round(tempF*10) / 10;
+  //float tempF = tempSensor.getTempFByIndex(0);
+  //data[TEMP] = round(tempF*10) / 10;
+  data[TEMP] = round(tempSensor.getTempFByIndex(0)*10)/10;
+  
     // Check if reading was successful
     //Serial.print("Temperature is: ");
     //Serial.println(tempSensor.getTempFByIndex(0));
@@ -30,15 +32,16 @@ void readSensors() {
 
   float voltage = analogRead(pH_PIN) * (VOLTAGE / 4095.0); // Convert to voltage
   //float pH = -5.6548 * voltage + 15.509 + OFFSET; // Convert voltage to pH (example equation, needs calibration)
-  float pH = -6.1216 * voltage + 15.162; // new formula
+  data[PH] = -6.1216 * voltage + 15.162; // new formula
   //Serial.println(voltage);
   //Serial.print("The pH is: ");
   //Serial.println(pH);
 
   delay(10);                      // wait 10 milliseconds
-  value = analogRead(SIGNAL_PIN); // read the analog value from sensor
+  data[WATER_LEVEL] = analogRead(SIGNAL_PIN); // read the analog value from sensor
   digitalWrite(POWER_PIN, LOW);   // turn the sensor OFF
 
   //Serial.print("The water sensor value: ");
-  Serial.println(value);
+  for(int i = 0; i<4; i++)  
+    Serial.println(data[i]);
 }

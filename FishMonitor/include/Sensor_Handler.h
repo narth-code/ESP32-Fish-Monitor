@@ -30,7 +30,8 @@ extern float readTemp();
 #define POWER_PIN  14 // ESP32 pin connected to sensor's VCC pin
 #define SIGNAL_PIN 27 // ESP32 pin connected to sensor's signal pin
 
-extern int value; // variable to store the sensor value
+enum{TEMP, PH, WATER_LEVEL, FOOD_COUNT};
+extern float data[4]; // variable to store the sensor value
 
 void setupWaterLevel();
 extern int readLevel();
