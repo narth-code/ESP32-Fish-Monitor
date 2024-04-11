@@ -8,9 +8,9 @@
 #define OLED_RESET     23
 #define SCREEN_ADDRESS 0x3C // OLED display I2C address
 
-#define SW1_PIN 16
-#define SW2_PIN 4
-#define SW3_PIN 2
+#define SW1_PIN 15 //16 
+#define SW2_PIN 16 //4
+#define SW3_PIN 17 //2
 
 #define BAUD 115200
 #define DEBOUNCE_MS 200

@@ -13,16 +13,17 @@ void setupSensors() {
 
   pinMode(pH_PIN, INPUT);
 
+  pinMode(SIGNAL_PIN,INPUT);  // Water level signal
   pinMode(POWER_PIN, OUTPUT);   // configure pin as an OUTPUT
   digitalWrite(POWER_PIN, LOW); // turn the sensor OFF
+
 }
 
 void readSensors() {
-  digitalWrite(POWER_PIN, HIGH);  // turn the sensor ON
-  
   tempSensor.requestTemperatures(); 
   //float tempF = tempSensor.getTempFByIndex(0);
   //data[TEMP] = round(tempF*10) / 10;
+  //digitalWrite(POWER_PIN,LOW);
   data[TEMP] = round(tempSensor.getTempFByIndex(0)*10)/10;
   
     // Check if reading was successful
@@ -37,11 +38,15 @@ void readSensors() {
   //Serial.print("The pH is: ");
   //Serial.println(pH);
 
+  digitalWrite(POWER_PIN, HIGH);   // turn the sensor ON
   delay(10);                      // wait 10 milliseconds
   data[WATER_LEVEL] = analogRead(SIGNAL_PIN); // read the analog value from sensor
   digitalWrite(POWER_PIN, LOW);   // turn the sensor OFF
 
   //Serial.print("The water sensor value: ");
-  for(int i = 0; i<4; i++)  
-    Serial.println(data[i]);
+  
+  Serial.print("TEMP: ");  Serial.println(data[TEMP]);
+  Serial.print("PH: ");   Serial.println(data[PH]);  
+  Serial.print("LEVEL: "); Serial.println(data[WATER_LEVEL]);
+  Serial.print("COUNT: "); Serial.println(data[FOOD_COUNT]);
 }

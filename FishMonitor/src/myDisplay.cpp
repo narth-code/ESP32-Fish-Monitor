@@ -66,6 +66,7 @@ void setupLCD() {
      Serial.println("Unable to initialize OLED");
      while (1) yield();
   }
+  Serial.println("OLED Initialized");
 
   display.display(); // Display initialization
   
@@ -97,7 +98,7 @@ void displayMainPage() {
 
   display.setCursor(64,0);
   display.print("Level:");
-  display.print(levelGood ? "Good" : "Bad");
+  display.print(data[WATER_LEVEL] > 0 ? "Bad" : "Good");
 
   display.setCursor(0,10);
   display.print("pH:");
@@ -208,19 +209,11 @@ void displayMaintenanceSettings() {
   display.println(F("Reset Food Count"));
   display.println(F("Clear Notification"));
 
-  display.clearDisplay();
-  display.setCursor(0,0);
-  display.write(0x10); //►
-  //display.println();
-  display.write(0x11); //◄
-  //display.println();
-  display.drawBitmap(0, display.height()-7, ireturnArrow, 5, 7, WHITE);
-  display.drawBitmap(15, 0, bluetooth_icon, 16, 16, WHITE);
-  display.drawBitmap(31, 0, wrench_icon, 15, 15, WHITE);
+
   
 
   display.clearDisplay();
-  //display.drawBitmap(0, 0, newLogo, 128, 32, WHITE);
+  display.drawBitmap(0, 0, newLogo, 128, 32, WHITE);
 
   
   display.display();
@@ -256,6 +249,7 @@ void handleMainPageButtons() {
     flags.b2 = false;
   }
   if (flags.b3) {
+    readSensors();
     flags.b3 = false;
   }
 }

@@ -1,3 +1,4 @@
+#pragma once
 #ifndef LCD_ICONS_H
 #define LCD_ICONS_H
 const unsigned char newLogo[] PROGMEM = {
