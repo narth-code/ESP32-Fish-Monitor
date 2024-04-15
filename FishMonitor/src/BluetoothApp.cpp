@@ -26,39 +26,27 @@ BluetoothSerial ESP_BT;
 
 
 void setupBT() {
-  ESP_BT.begin("ESp32_FishMonitor");        // Name of your Bluetooth interface -> will show up on your phone
-  Serial.println("Bluetooth ready to pair");
+  ESP_BT.begin(">FishMonitor| 3C:E9:0E:08:F9:AE");        // Name of your Bluetooth interface -> will show up on your phone
+  Serial.println(">Bluetooth ready to pair");
   
   uint8_t mac_arr[6]; // Byte array to hold the MAC address from getBtAddress()
-  BTAddress mac_obj; // Object holding instance of BTAddress with the MAC (for more details see libraries/BluetoothSerial/src/BTAddress.h)
   String mac_str; // String holding the text version of MAC in format AA:BB:CC:DD:EE:FF
 
   ESP_BT.getBtAddress(mac_arr); // Fill in the array
-  mac_obj = ESP_BT.getBtAddressObject(); // Instantiate the object
   mac_str = ESP_BT.getBtAddressString(); // Copy the string
 
-  Serial.print("This device is instantiated with name "); Serial.println("ESp32_FishMonitor");
-
-  Serial.print("The mac address using byte array: ");
-  for(int i = 0; i < ESP_BD_ADDR_LEN-1; i++){
-    Serial.print(mac_arr[i], HEX); Serial.print(":");
-  }
-  Serial.println(mac_arr[ESP_BD_ADDR_LEN-1], HEX);
-
-  Serial.print("The mac address using BTAddress object using default method `toString()`: "); Serial.println(mac_obj.toString().c_str());
-  Serial.print("The mac address using BTAddress object using method `toString(true)`\n\twhich prints the MAC with capital letters: "); Serial.println(mac_obj.toString(true).c_str()); // This actually what is used inside the getBtAddressString()
-
-  Serial.print("The mac address using string: "); Serial.println(mac_str.c_str());
+  
+  Serial.print(">The mac address using string: "); Serial.println(mac_str.c_str());
 }
 
 
 
 void checkBluetooth() {
- 
+  /*
   // -------------------- Receive Bluetooth signal ----------------------
   if (ESP_BT.available()) {
-    incoming = ESP_BT.read();           // Read what we receive and store in "incoming"
-
+    //incoming = ESP_BT.read();           // Read what we receive and store in "incoming"
+    Serial.println(ESP_BT.read());
     if (incoming > 127) {               // ID bytes are 128 or higher, so check if incoming byte is an ID-byte
       reset_rx_BT();                    // reset id and data to -1
       id = incoming - 128;              // write id value
@@ -102,7 +90,13 @@ void checkBluetooth() {
     }
 
   }
-  
+  */
+  while(ESP_BT.available()) {
+        int c=ESP_BT.read();
+        if(c >= 0) {
+          Serial.print((char) c);
+        }
+  }
 }
 
 void reset_rx_BT() {                    // function to erase all bytes (set to -1)

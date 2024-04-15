@@ -2,7 +2,9 @@
 #include <Sensor_Handler.h>
 #include <Bluetooth_Handler.h>
 #include <stepperMotor.h>
+#include <secrets.h>
 #include <LCD_Handler.h>
+#include <gpio_viewer.h>
 
 /*
 // Define button pin numbers
@@ -16,16 +18,22 @@ ButtonHandler buttons[numberOfButtons] = {
 */
 
 unsigned long lastProbeReadTime = 0;
+GPIOViewer viewer;
 
-
-
+extern ButtonFlags flags;
+extern float data[4];
 void setup() {
+
   Serial.begin(BAUD);
-  // put your setup code here, to run once:
+  viewer.connectToWifi(WIFI_SSID ,WIFI_PASS);
+  viewer.begin();
+
   setupMotor();
   setupSensors();
   setupBT();
   setupLCD();
+
+  
 
 }
 
@@ -47,6 +55,7 @@ void loop() {
       }
   }
   */
+  
   checkBluetooth();
   toDisplay();
 

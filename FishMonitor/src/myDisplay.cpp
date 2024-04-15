@@ -55,7 +55,7 @@ void IRAM_ATTR buttonISR() {
   middleButton.read();
   rightButton.read();
 }
-
+// MARK: SETUP
 void setupLCD() {
 
   //while (! Serial) delay(100);
@@ -85,7 +85,7 @@ void setupLCD() {
   middleButton.enableInterrupt(buttonISR);
   rightButton.enableInterrupt(buttonISR);
 }
-
+// MARK: DISPLAY MAIN
 void displayMainPage() {
   display.clearDisplay();
   //display.setTextWrap(false);
@@ -102,7 +102,7 @@ void displayMainPage() {
 
   display.setCursor(0,10);
   display.print("pH:");
-  display.print(data[PH]);
+  display.print(data[PH]); 
   //display.print(pHGood ? "Good" : "Bad");
 
 
@@ -139,7 +139,7 @@ void displayMainPage() {
 
   display.display();
 }
-
+// MARK: DISPLAY SETTINGS
 void displaySettingsPage() {
   display.clearDisplay();
   if(flags.toggleSelect) {
@@ -179,7 +179,7 @@ void displaySettingsPage() {
   display.setCursor(50,SCREEN_HEIGHT-7);
   display.write(0x11); //◄
   display.write("|");
-  display.write(0x10); //►
+  display.write(0x10); //► 
 
   display.setTextColor(WHITE);
   display.setTextColor(BLACK, WHITE);
@@ -191,7 +191,7 @@ void displaySettingsPage() {
 
   display.display();
 }
-
+// MARK: DISPLAY BLUETOOTH
 void displayBluetoothSettings() {
   display.clearDisplay();
   display.setTextSize(1);
@@ -201,6 +201,7 @@ void displayBluetoothSettings() {
   display.println(F("Disconnect"));
   display.display();
 }
+// MARK: DISPLAY MAINTENANCE
 void displayMaintenanceSettings() {
   display.clearDisplay();
   display.setTextSize(1);
@@ -218,6 +219,7 @@ void displayMaintenanceSettings() {
   
   display.display();
 }
+// MARK: toDISPLAY
 void toDisplay() {
   switch(currentScreen) {
     case MAIN_PAGE:
@@ -239,7 +241,7 @@ void toDisplay() {
     default: break;
   }
 }
-
+// MARK: button Main
 void handleMainPageButtons() {
   if (flags.b1) {
     currentScreen = SETTINGS_PAGE;
@@ -250,10 +252,12 @@ void handleMainPageButtons() {
   }
   if (flags.b3) {
     readSensors();
+    Serial.println(data[TEMP]);
+    Serial.println(data[WATER_LEVEL]);
     flags.b3 = false;
   }
 }
-
+// MARK: Button Settings
 void handleSettingsPageButtons() {
   if (flags.b1) { // Return button
     currentScreen = MAIN_PAGE;

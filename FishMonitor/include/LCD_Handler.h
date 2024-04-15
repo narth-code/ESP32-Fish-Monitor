@@ -5,12 +5,12 @@
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 32
 
-#define OLED_RESET     23
+#define OLED_RESET     23    // SCL = 22, SDA = 21
 #define SCREEN_ADDRESS 0x3C // OLED display I2C address
 
-#define SW1_PIN 15 //16 
-#define SW2_PIN 16 //4
-#define SW3_PIN 17 //2
+#define SW1_PIN 15  
+#define SW2_PIN 16 
+#define SW3_PIN 17 
 
 #define BAUD 115200
 #define DEBOUNCE_MS 200
