@@ -12,7 +12,7 @@
 #define stepsPerRevolution  2048
 #define stepsPerSegment(segments)  ((int)stepsPerRevolution / (int)segments)
 
-#define ONE_SERVING stepsPerSegment(14)
+#define ONE_SERVING stepsPerSegment(15)
 
 void setupMotor();
 void feed();
