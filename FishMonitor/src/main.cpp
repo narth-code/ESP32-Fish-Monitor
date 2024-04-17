@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <Sensor_Handler.h>
 #include <Bluetooth_Handler.h>
-#include <stepperMotor.h>
 #include <secrets.h>
 #include <LCD_Handler.h>
 #include <gpio_viewer.h>
@@ -19,7 +18,6 @@ void setup() {
   viewer.connectToWifi(WIFI_SSID ,WIFI_PASS);
   viewer.begin();
 
-  setupMotor();
   setupSensors();
   setupBT();
   setupLCD();

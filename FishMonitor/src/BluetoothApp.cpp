@@ -14,7 +14,7 @@
 
 // this header is needed for Bluetooth Serial -> works ONLY on ESP32
 #include "Bluetooth_Handler.h"
-#include "stepperMotor.h"
+
 
 // init Class:
 BluetoothSerial ESP_BT; 

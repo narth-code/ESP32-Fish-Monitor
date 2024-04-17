@@ -9,7 +9,7 @@
 #include <LCD_Handler.h>
 #include <LCD_Icons.h>
 #include <Sensor_Handler.h>
-#include <stepperMotor.h>
+
 
 Adafruit_SSD1305 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 

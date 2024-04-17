@@ -5,6 +5,10 @@ OneWire oneWire(ONE_WIRE_BUS);
 
 // Pass oneWire reference to DallasTemperature library
 DallasTemperature tempSensor(&oneWire);
+
+Stepper myStepper(stepsPerRevolution, IN1, IN2, IN3, IN4);
+
+
 float data[4] = {75,7.1,0,14};
 
 
@@ -16,6 +20,8 @@ void setupSensors() {
   pinMode(SIGNAL_PIN,INPUT);  // Water level signal
   //pinMode(POWER_PIN, OUTPUT);   // configure pin as an OUTPUT
   digitalWrite(POWER_PIN, LOW); // turn the sensor OFF
+
+  myStepper.setSpeed(10);
 
 }
 
@@ -46,4 +52,14 @@ void readSensors() {
   Serial.print("PH: ");   Serial.println(data[PH]);  
   Serial.print("LEVEL: "); Serial.println(data[WATER_LEVEL]);
   Serial.print("COUNT: "); Serial.println(data[FOOD_COUNT]);
+}
+
+void feed() {
+  // step one segment:
+  Serial.print("Moving one segment: "); Serial.println(ONE_SERVING);
+  myStepper.step(ONE_SERVING);
+  //myStepper.step(2048);
+
+  // You might want to add code here to do something between segments
+  // Or simply remove the delay if continuous movement is desired
 }
