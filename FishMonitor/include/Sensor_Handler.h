@@ -10,25 +10,25 @@
 #include <Stepper.h>
 
 //  WATER TEMP
-#define ONE_WIRE_BUS 33  // 36 Data wire is connected to GPIO 34
+#define ONE_WIRE_BUS 35  // Data wire is connected to GPIO 34
 extern OneWire oneWire;
 //  =========================================
 
 //  PH   
-#define pH_PIN  32 //39
-#define VOLTAGE 3.3
+#define pH_PIN  32 //
+#define VOLTAGE 3.27
 //  =========================================
 
 //  WATER LEVEL 
-#define SIGNAL_PIN 35     //34  ESP32 pin connected to sensor's signal pin
-#define POWER_PIN  4     //35  ESP32 pin connected to sensor's VCC pin
+#define SIGNAL_PIN 33     //   ESP32 pin connected to sensor's signal pin
+//#define POWER_PIN  4     //    ESP32 pin connected to sensor's VCC pin
 //  =========================================
 
 // STEPPER
-#define IN1 25
-#define IN2 26
-#define IN3 27
-#define IN4 14
+#define IN1 14
+#define IN2 27
+#define IN3 26
+#define IN4 25
 
 #define stepsPerRevolution  2048
 #define stepsPerSegment(segments)  ((int)stepsPerRevolution / (int)segments)
