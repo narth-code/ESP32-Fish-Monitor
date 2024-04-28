@@ -23,10 +23,6 @@ enum Screen {
 
 Screen currentScreen = MAIN_PAGE;
 
-int tempValue = 74;
-bool pHGood = true;
-bool levelGood = true;
-int foodValue = 7; // Assuming initial food value
 
 EasyButton leftButton(SW1_PIN);
 EasyButton middleButton(SW2_PIN);
@@ -59,8 +55,8 @@ void IRAM_ATTR buttonISR() {
 // MARK: SETUP
 void setupLCD() {
 
-  //while (! Serial) delay(100);
-  //Serial.println("SSD1305 OLED test");
+  while (! Serial) delay(100);
+  Serial.println("Initializing SSD1305 OLED...");
 
   Wire.begin();
   if ( ! display.begin(0x3C) ) {
@@ -89,17 +85,17 @@ void setupLCD() {
 // MARK: DISPLAY MAIN
 void displayMainPage() {
   display.clearDisplay();
-  //display.setTextWrap(false);
+  display.setTextWrap(false);
   display.setTextSize(1);
   display.setTextColor(WHITE);
   display.setCursor(0,0);
   display.print("Temp:");
-  display.print((int)data[TEMP]);
+  display.print(((int)round(data[TEMP]*10))/10);
   display.print("F");
 
   display.setCursor(64,0);
   display.print("Level:");
-  display.print(data[WATER_LEVEL] > 0 ? "Bad" : "Good");
+  display.print(data[WATER_LEVEL] > 0 ? "Good" : "Bad");
 
   display.setCursor(0,10);
   display.print("pH:");
@@ -111,7 +107,7 @@ void displayMainPage() {
   display.setCursor(64,10);
   display.print("Food:");
   display.print((int)data[FOOD_COUNT]);
-  display.print("/14");
+  display.print("/15");
 
   // Button indicators
   display.setTextColor(BLACK, WHITE);
@@ -123,7 +119,7 @@ void displayMainPage() {
 
   display.setTextColor(BLACK, WHITE);
   //display.drawLine(54,SCREEN_HEIGHT-11, 54, SCREEN_HEIGHT-4, WHITE);
-  display.setCursor(55,SCREEN_HEIGHT-11);
+  display.setCursor(52,SCREEN_HEIGHT-11);
   display.print("Feed");
   
 
@@ -132,7 +128,7 @@ void displayMainPage() {
 
   display.setTextColor(BLACK, WHITE);
   //display.drawLine(85,SCREEN_HEIGHT-11, 85, SCREEN_HEIGHT-4, WHITE);
-  display.setCursor(86,SCREEN_HEIGHT-11);
+  display.setCursor(82,SCREEN_HEIGHT-11);
   display.print("Refresh");
   display.setTextColor(WHITE);
   //drawArrow(106,31);
@@ -215,7 +211,7 @@ void displayMaintenanceSettings() {
   
 
   display.clearDisplay();
-  display.drawBitmap(0, 0, newLogo, 128, 32, WHITE);
+  display.drawBitmap(0, 0, MANTA_LOGO, 128, 32, WHITE);
 
   
   display.display();
@@ -254,8 +250,6 @@ void handleMainPageButtons() {
   }
   if (flags.b3) {
     readSensors();
-    Serial.println(data[TEMP]);
-    Serial.println(data[WATER_LEVEL]);
     flags.b3 = false;
   }
 }

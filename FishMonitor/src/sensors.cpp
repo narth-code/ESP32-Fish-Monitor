@@ -9,7 +9,7 @@ DallasTemperature tempSensor(&oneWire);
 Stepper myStepper(stepsPerRevolution, IN1, IN2, IN3, IN4);
 
 
-float data[4] = {75,7.1,0,14};
+float data[4];
 
 
 void setupSensors() {
@@ -19,9 +19,10 @@ void setupSensors() {
 
   pinMode(SIGNAL_PIN,INPUT);  // Water level signal
   //pinMode(POWER_PIN, OUTPUT);   // configure pin as an OUTPUT
-  digitalWrite(POWER_PIN, LOW); // turn the sensor OFF
+  //digitalWrite(POWER_PIN, LOW); // turn the sensor OFF
 
-  myStepper.setSpeed(10);
+  myStepper.setSpeed(30);
+  data[FOOD_COUNT] = 15;
 
 }
 
@@ -31,6 +32,7 @@ void readSensors() {
   //data[TEMP] = round(tempF*10) / 10;
   //digitalWrite(POWER_PIN,LOW);
   data[TEMP] = tempSensor.getTempFByIndex(0);
+  data[TEMP] = ((int)round(data[TEMP]*10))/10; // truncating to nearest 0.1
   
     // Check if reading was successful
     //Serial.print("Temperature is: ");
@@ -60,6 +62,5 @@ void feed() {
   myStepper.step(ONE_SERVING);
   //myStepper.step(2048);
 
-  // You might want to add code here to do something between segments
-  // Or simply remove the delay if continuous movement is desired
+  data[FOOD_COUNT]--;
 }

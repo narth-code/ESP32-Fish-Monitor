@@ -15,12 +15,12 @@ extern float data[4];
 void setup() {
 
   Serial.begin(BAUD);
-  viewer.connectToWifi(WIFI_SSID ,WIFI_PASS);
-  viewer.begin();
+  //viewer.connectToWifi(WIFI_SSID ,WIFI_PASS);
+  //viewer.begin();
 
   setupSensors();
-  setupBT();
   setupLCD();
+  setupBT();
 
   
 
