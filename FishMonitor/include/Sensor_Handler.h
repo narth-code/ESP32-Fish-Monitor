@@ -47,4 +47,6 @@ void setupSensors();
 void readSensors(); 
 void feed();
 
+void IRAM_ATTR setAutoFeed();
+void IRAM_ATTR autoFeed();
 #endif

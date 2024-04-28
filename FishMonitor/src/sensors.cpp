@@ -21,7 +21,7 @@ void setupSensors() {
   //pinMode(POWER_PIN, OUTPUT);   // configure pin as an OUTPUT
   //digitalWrite(POWER_PIN, LOW); // turn the sensor OFF
 
-  myStepper.setSpeed(30);
+  myStepper.setSpeed(20);
   data[FOOD_COUNT] = 15;
 
 }
@@ -68,3 +68,4 @@ void feed() {
     Serial.println("Please refill Food");
   }
 }
+

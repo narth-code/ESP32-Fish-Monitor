@@ -32,9 +32,11 @@ void displaySettingsPage();
 void displayBluetoothSettings();
 void displayMaintenanceSettings();
 
-void handleMainPageButtons();
-void handleSettingsPageButtons();
-void handleBluetoothPageButtons();
-void handleMaintenancePageButtons();
+void handleButtons();
+// void handleMainPageButtons();
+// void handleSettingsPageButtons();
+// void handleBluetoothPageButtons();
+// void handleMaintenancePageButtons();
 extern void drawArrow(uint8_t x, uint8_t y);
+void IRAM_ATTR buttonISR();
 #endif

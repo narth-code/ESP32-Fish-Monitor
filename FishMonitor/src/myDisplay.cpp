@@ -14,14 +14,13 @@
 Adafruit_SSD1305 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 
-enum Screen {
+enum{
   MAIN_PAGE,
   SETTINGS_PAGE,
   BLUETOOTH_SETTINGS, 
   MAINTENANCE_SETTINGS
 };
-
-Screen currentScreen = MAIN_PAGE;
+u_int8_t currentScreen= MAIN_PAGE;
 
 
 EasyButton leftButton(SW1_PIN);
@@ -218,85 +217,88 @@ void displayMaintenanceSettings() {
 }
 // MARK: toDISPLAY
 void toDisplay() {
-  switch(currentScreen) {
-    case MAIN_PAGE:
-      displayMainPage();
-      handleMainPageButtons();
-      break;
-    case SETTINGS_PAGE:
-      displaySettingsPage();
-      handleSettingsPageButtons();
-      break;
-    case BLUETOOTH_SETTINGS:
-      displayBluetoothSettings();
-      handleBluetoothPageButtons();
-      break;
-    case MAINTENANCE_SETTINGS:
-      displayMaintenanceSettings();
-      handleMaintenancePageButtons();
-      break;
-    default: break;
-  }
-}
-// MARK: button Main
-void handleMainPageButtons() {
-  if (flags.b1) {
-    currentScreen = SETTINGS_PAGE;
-    flags.b1 = false;
-  }
-  if (flags.b2) {
-    flags.b2 = false;
-    feed();
-  }
-  if (flags.b3) {
-    readSensors();
-    flags.b3 = false;
-  }
-}
-// MARK: Button Settings
-void handleSettingsPageButtons() {
-  if (flags.b1) { // Return button
-    currentScreen = MAIN_PAGE;
-    flags.b1 = false;
-  }
-  if (flags.b2) { // Navigate
-    flags.toggleSelect = !(flags.toggleSelect);
-    flags.b2 = false;
-  }
-  if (flags.b3) {
-    currentScreen = (flags.toggleSelect ? MAINTENANCE_SETTINGS : BLUETOOTH_SETTINGS);
-    flags.b3 = false;
-    flags.toggleSelect = false;
-  }
+
+    switch(currentScreen) {
+        case MAIN_PAGE:
+            displayMainPage(); break;
+        case SETTINGS_PAGE:
+            displaySettingsPage(); break;
+        case BLUETOOTH_SETTINGS:
+            displayBluetoothSettings(); break;
+        case MAINTENANCE_SETTINGS:
+            displayMaintenanceSettings(); break;
+        default: break;
+    }
+    handleButtons(); 
 }
 
-void handleBluetoothPageButtons() {
-  if (flags.b1) { // Return button
-    currentScreen = SETTINGS_PAGE;
-    flags.b1 = false;
-  }
-  if (flags.b2) { // Navigate
-    // Feed Logic
-    flags.b2 = false;
-  }
-  if (flags.b3) {
-    // Implement refresh logic
-    flags.b3 = false;
-  }
-}
-void handleMaintenancePageButtons() {
-  if (flags.b1) { // Return button
-    currentScreen = SETTINGS_PAGE;
-    flags.b1 = false;
-  }
-  if (flags.b2) { // Navigate
-    // Feed Logic
-    flags.b2 = false;
-  }
-  if (flags.b3) {
-    // Implement refresh logic
-    flags.b3 = false;
-  }
+// MARK: handleBUttons
+void handleButtons() {
+    switch(currentScreen) {
+        case MAIN_PAGE:
+            if (flags.b1) {
+                currentScreen = SETTINGS_PAGE;
+                flags.b1 = false;
+            }
+            if (flags.b2) {
+                flags.b2 = false;
+                feed();
+            }
+            if (flags.b3) {
+                readSensors();
+                flags.b3 = false;
+            }
+            break;
+
+        case SETTINGS_PAGE:
+            if (flags.b1) { // Return button
+                currentScreen = MAIN_PAGE;
+                flags.b1 = false;
+            }
+            if (flags.b2) { // Navigate
+                flags.toggleSelect = !(flags.toggleSelect);
+                flags.b2 = false;
+            }
+            if (flags.b3) {
+                currentScreen = (flags.toggleSelect ? MAINTENANCE_SETTINGS : BLUETOOTH_SETTINGS);
+                flags.b3 = false;
+                flags.toggleSelect = false;
+            }
+            break;
+
+        case BLUETOOTH_SETTINGS:
+            if (flags.b1) { // Return button
+                currentScreen = SETTINGS_PAGE;
+                flags.b1 = false;
+            }
+            if (flags.b2) { // Navigate
+                // Add specific logic here if necessary
+                flags.b2 = false;
+            }
+            if (flags.b3) {
+                // Implement refresh logic here
+                flags.b3 = false;
+            }
+            break;
+
+        case MAINTENANCE_SETTINGS:
+            if (flags.b1) { // Return button
+                currentScreen = SETTINGS_PAGE;
+                flags.b1 = false;
+            }
+            if (flags.b2) { // Navigate
+                // Add specific logic here if necessary
+                flags.b2 = false;
+            }
+            if (flags.b3) {
+                // Implement refresh logic here
+                flags.b3 = false;
+            }
+            break;
+
+        default:
+            break;
+    }
 }
 void drawArrow(uint8_t x, uint8_t y)
 {
