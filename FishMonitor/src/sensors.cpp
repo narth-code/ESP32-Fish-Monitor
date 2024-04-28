@@ -57,10 +57,14 @@ void readSensors() {
 }
 
 void feed() {
-  // step one segment:
-  Serial.print("Moving one segment: "); Serial.println(ONE_SERVING);
-  myStepper.step(ONE_SERVING);
-  //myStepper.step(2048);
 
-  data[FOOD_COUNT]--;
+  // step one segment:
+  if(data[FOOD_COUNT] > 0){
+    Serial.print("Moving one segment: "); Serial.println(ONE_SERVING);
+    myStepper.step(ONE_SERVING);
+    data[FOOD_COUNT]--;
+  }
+  else{
+    Serial.println("Please refill Food");
+  }
 }
