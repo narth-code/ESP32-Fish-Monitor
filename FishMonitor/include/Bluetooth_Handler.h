@@ -11,8 +11,14 @@ extern int id;                            // received identification byte
 extern int val_byte1;                     // most significant byte of data value
 extern int val_byte2;                     // least significant byte of data value
 
+extern float data[4];
+
+void btAdvertisedDeviceFound(BTAdvertisedDevice* pDevice);
 void setupBT();
 void checkBluetooth();
+
+
+void send_values();
 void send_BT(int id, int value);
 void reset_rx_BT();
 

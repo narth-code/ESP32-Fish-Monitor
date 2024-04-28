@@ -19,34 +19,36 @@
 // init Class:
 BluetoothSerial ESP_BT; 
 
- int incoming;                           // variable to store byte received from phone 
- int id = -1;                            // received identification byte
- int val_byte1 = -1;                     // most significant byte of data value
- int val_byte2 = -1;  
+int incoming;                           // variable to store byte received from phone 
+int id = -1;                            // received identification byte
+int val_byte1 = -1;                     // most significant byte of data value
+int val_byte2 = -1;  
+bool btScanAsync = true;
+
 
 
 void setupBT() {
-  ESP_BT.begin(">FishMonitor| 3C:E9:0E:08:F9:AE");        // Name of your Bluetooth interface -> will show up on your phone
+  ESP_BT.begin(">FishMonitor");        // Name of your Bluetooth interface -> will show up on your phone
+  //Serial.println("3C:E9:0E:08:F9:AE"); // MAC ADDRESS
   Serial.println(">Bluetooth ready to pair");
   
-  uint8_t mac_arr[6]; // Byte array to hold the MAC address from getBtAddress()
-  String mac_str; // String holding the text version of MAC in format AA:BB:CC:DD:EE:FF
-
-  ESP_BT.getBtAddress(mac_arr); // Fill in the array
-  mac_str = ESP_BT.getBtAddressString(); // Copy the string
-
-  
-  Serial.print(">The mac address using string: "); Serial.println(mac_str.c_str());
+  #ifdef DEBUG
+    uint8_t mac_arr[6]; // Byte array to hold the MAC address from getBtAddress()
+    String mac_str; // String holding the text version of MAC in format AA:BB:CC:DD:EE:FF
+    ESP_BT.getBtAddress(mac_arr); // Fill in the array
+    mac_str = ESP_BT.getBtAddressString(); // Copy the string
+    Serial.print(">The mac address using string: "); Serial.println(mac_str.c_str());
+  #endif
 }
 
 
 
 void checkBluetooth() {
-  /*
+  
   // -------------------- Receive Bluetooth signal ----------------------
   if (ESP_BT.available()) {
-    //incoming = ESP_BT.read();           // Read what we receive and store in "incoming"
-    Serial.println(ESP_BT.read());
+    incoming = ESP_BT.read();           // Read what we receive and store in "incoming"
+    Serial.println(incoming);
     if (incoming > 127) {               // ID bytes are 128 or higher, so check if incoming byte is an ID-byte
       reset_rx_BT();                    // reset id and data to -1
       id = incoming - 128;              // write id value
@@ -60,42 +62,32 @@ void checkBluetooth() {
       // here is the location that you can implement the code what you want to do with the controller id and value received from the phone
       value =0;
       switch (id) {
-          case 1:  
-            feed();
-            //value = readPH();
-            Serial.print("Measured: "); Serial.print(value); Serial.print("\t");
-            value = round(value * 100);
-            Serial.print("Button 1 (PH): "); Serial.println(value);
-            break;
-          case 2:  
-            //value = readTemp();
-            Serial.print("Measured: "); Serial.print(value); Serial.print("\t");
-            value *= 10;
-            Serial.print("Button 2 (Temp): "); Serial.println(value);
-            break;
-          case 3: 
-            //value = readLevel(); 
-            Serial.print("Measured: "); Serial.print(value); Serial.print("\t");
-
-            Serial.print("Button 3 (Level): "); Serial.println(value);
-            break;
+          case 4: feed(); break;
+          case 5: //time
+          break;
+          case 6: send_values(); break;
           default:
         
             break;
         }
       Serial.print(">Id: "); Serial.print(id); Serial.print(", val: "); Serial.println(value);   // for debugging write to the serial interface (check with serial monitor)
-      send_BT(id, value);               // for test purposes we just send the data back to the phone
+      send_BT(id, value);                 // for test purposes we just send the data back to the phone
       //reset_rx_BT();                    // not strictly needed, but just in case erase all bytes (set to -1)
 
     }
 
   }
-  */
-  while(ESP_BT.available()) {
-        int c=ESP_BT.read();
-        if(c >= 0) {
-          Serial.print((char) c);
-        }
+  
+
+}
+void send_values(){
+  int i;
+  float data1[4] = {76, 7000, 100, 14};
+  readSensors();
+  for(int i = 0; i <= 3; i++)
+  {
+    Serial.print(">Id: "); Serial.print(i+1); Serial.print(", val: "); Serial.println(data[i]);
+    send_BT(i+1, data[i]);
   }
 }
 
@@ -106,6 +98,6 @@ void reset_rx_BT() {                    // function to erase all bytes (set to -
 }
 void send_BT(int id, int value) {       // function to write id and value to the bluetooth interface (and split value in MSB and LSB
   ESP_BT.write(128 + id);
-  ESP_BT.write((value/128));       // MSB
+  ESP_BT.write((value/128));            // MSB
   ESP_BT.write(value%128);              // LSB
 }
