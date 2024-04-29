@@ -10,7 +10,7 @@
 #include <Stepper.h>
 
 //  WATER TEMP
-#define ONE_WIRE_BUS 35  // Data wire is connected to GPIO 34
+#define ONE_WIRE_BUS 33  // Data wire is connected to GPIO 34
 extern OneWire oneWire;
 //  =========================================
 
@@ -20,7 +20,7 @@ extern OneWire oneWire;
 //  =========================================
 
 //  WATER LEVEL 
-#define SIGNAL_PIN 33     //   ESP32 pin connected to sensor's signal pin
+#define SIGNAL_PIN 35     //   ESP32 pin connected to sensor's signal pin
 //#define POWER_PIN  4     //    ESP32 pin connected to sensor's VCC pin
 //  =========================================
 

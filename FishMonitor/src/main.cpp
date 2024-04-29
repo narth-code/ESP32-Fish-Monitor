@@ -23,9 +23,6 @@ void setup() {
   setupSensors();
   setupLCD();
   setupBT();
-
-  
-
 }
 
 void loop() {

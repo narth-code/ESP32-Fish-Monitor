@@ -21,7 +21,7 @@ void setupSensors() {
   //pinMode(POWER_PIN, OUTPUT);   // configure pin as an OUTPUT
   //digitalWrite(POWER_PIN, LOW); // turn the sensor OFF
 
-  myStepper.setSpeed(20);
+  myStepper.setSpeed(10);
   data[FOOD_COUNT] = 15;
 
 }
@@ -49,11 +49,12 @@ void readSensors() {
   //digitalWrite(POWER_PIN, LOW);   // turn the sensor OFF
 
   
-  
-  Serial.print("TEMP: ");  Serial.println(data[TEMP]);
-  Serial.print("PH: ");   Serial.println(data[PH]);  
-  Serial.print("LEVEL: "); Serial.println(data[WATER_LEVEL]);
-  Serial.print("COUNT: "); Serial.println(data[FOOD_COUNT]);
+  #ifndef DEBUG
+    Serial.print("TEMP: ");  Serial.println(data[TEMP]);
+    Serial.print("PH: ");   Serial.println(data[PH]);  
+    Serial.print("LEVEL: "); Serial.println(data[WATER_LEVEL]);
+    Serial.print("COUNT: "); Serial.println(data[FOOD_COUNT]);
+  #endif
 }
 
 void feed() {
