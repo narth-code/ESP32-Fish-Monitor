@@ -18,7 +18,8 @@ enum{
   MAIN_PAGE,
   SETTINGS_PAGE,
   BLUETOOTH_SETTINGS, 
-  MAINTENANCE_SETTINGS
+  MAINTENANCE_SETTINGS,
+  FEED_PAGE
 };
 u_int8_t currentScreen= MAIN_PAGE;
 
@@ -60,7 +61,7 @@ void setupLCD() {
   Wire.begin();
   if ( ! display.begin(0x3C) ) {
      Serial.println("Unable to initialize OLED");
-     while (1) yield();
+     yield();
   }
   Serial.println("OLED Initialized");
 

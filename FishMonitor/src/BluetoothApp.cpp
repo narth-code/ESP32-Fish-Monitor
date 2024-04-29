@@ -44,6 +44,12 @@ void setupBT() {
     mac_str = ESP_BT.getBtAddressString(); // Copy the string
     Serial.print(">The mac address using string: "); Serial.println(mac_str.c_str());
   #endif
+
+  timer1 = timerBegin(1, 80, true); // Timer 0, prescaler 80, count up
+  timer3 = timerBegin(3, 80, false);
+
+  timerAttachInterrupt(timer1, &setAutoFeed, true); // Attach interrupt function
+  timerAttachInterrupt(timer3, &autoFeed, true); // Attach interrupt function
 }
 
 
@@ -53,7 +59,7 @@ void checkBluetooth() {
   // -------------------- Receive Bluetooth signal ----------------------
   if (ESP_BT.available()) {
     incoming = ESP_BT.read();           // Read what we receive and store in "incoming"
-    Serial.println(incoming);
+    //Serial.println(incoming);
     if (incoming > 127) {               // ID bytes are 128 or higher, so check if incoming byte is an ID-byte
       reset_rx_BT();                    // reset id and data to -1
       id = incoming - 128;              // write id value
@@ -64,15 +70,16 @@ void checkBluetooth() {
     else if (val_byte2 == -1) {         // check if second data byte is empty (-1)
       val_byte2 = incoming;             // write second data byte (LSB)
       // recombine the first and second data byte to the actual value that was sent from the phone
-      float value = (id == 5 || id == 7 ? 128*val_byte1 + val_byte2 : 0); // if it's time id, set the "seconds" value      
+      float value =128*val_byte1 + val_byte2;
+      //float value = (id == 5 || id == 7 ? 128*val_byte1 + val_byte2 : 0); // if it's time id, set the "seconds" value      
       switch (id) {
-          case 4: 
-            feed(); break;
-          case 5: setTime(value);// set Time
+          case 4: feed(); 
             break;
-          case 6: 
-            send_values(); break;
-          case 7: // set feeding time
+          case 5: setFeedTime(value); // set Time
+            break;
+          case 6: send_values(); 
+            break;
+          case 7: setTime(value); // set feeding time
             break;
           default: break;
         }
@@ -82,49 +89,43 @@ void checkBluetooth() {
     }
   }
 }
-void setTime(int seconds) {
-  int hours = seconds / 3600;
-  int minutes = (seconds % 3600) / 60;
-  int secs = seconds % 60;
+void setTime(int minutes) {
+  int hours = minutes / 60;
+  int mins = minutes % 60;
 
-  rtc.setTime(secs, minutes, hours, 1, 1, 2021); // Update RTC with new time
-  Serial.printf("Time updated to: %02d:%02d:%02d\n", hours, minutes, secs);
+  rtc.setTime(0, mins, hours, 1, 1, 2024); // Update RTC with new time, assume seconds are 0
+  Serial.printf("Time updated to: %02d:%02d\n", hours, mins);
 }
 
-
-void setFeedTime(int seconds) {
-  int targetHour = seconds / 3600;
-  int targetMinute = (seconds % 3600) / 60;
-  int targetSecond = 0; // Feeding always on the exact minute
+void setFeedTime(int minutes) {
+  int targetHour = minutes / 60;
+  int targetMinute = minutes % 60;
 
   int currentHour = rtc.getHour();
   int currentMinute = rtc.getMinute();
-  int currentSecond = rtc.getSecond();
 
-  // Calculate delay until next feed time in seconds
-  long currentTotalSeconds = currentHour * 3600 + currentMinute * 60 + currentSecond;
-  long targetTotalSeconds = targetHour * 3600 + targetMinute * 60 + targetSecond;
-  long delaySeconds;
+  // Calculate delay until next feed time in minutes
+  int currentTotalMinutes = currentHour * 60 + currentMinute;
+  int delayMinutes;
 
-  if (currentTotalSeconds > targetTotalSeconds) {
-    // Next day feeding if current time is past the feed time
-    delaySeconds = 24 * 3600 - currentTotalSeconds + targetTotalSeconds;
-  } else {
-    // Same day feeding if current time is before the feed time
-    delaySeconds = targetTotalSeconds - currentTotalSeconds;
+
+  if(minutes - currentTotalMinutes < 0){
+    // (12 * 60) - delayMinutes
   }
+  
 
-  timerAlarmWrite(timer1, delaySeconds * 1000000, false); // Set timer for the delay in microseconds
-  timerAttachInterrupt(timer1, &setAutoFeed, true); // Attach interrupt function
+  timerAlarmWrite(timer1, delayMinutes * 60000000, false); // Set timer for the delay in microseconds (1 minute = 60,000,000 microseconds)
   timerAlarmEnable(timer1); // Enable timer
 
-  Serial.printf("Next feeding time set in %ld seconds\n", delaySeconds);
+  
+  //Serial.printf("Next feeding time set in %d minutes\n", delayMinutes);
+  Serial.printf("Next feeding time set for %02d:%02d (in %d minutes)\n", targetHour, targetMinute, delayMinutes);
 }
+
 
 void IRAM_ATTR setAutoFeed() {
   portENTER_CRITICAL_ISR(&timerMux1);
     timerAlarmWrite(timer3, 43200000000, true); // 12 hours in microseconds, auto-reload true
-    timerAttachInterrupt(timer1, &autoFeed, true); // Attach interrupt function
     timerAlarmEnable(timer3);
   portEXIT_CRITICAL_ISR(&timerMux1);
 }
@@ -136,8 +137,6 @@ void IRAM_ATTR autoFeed()
   portEXIT_CRITICAL_ISR(&timerMux3);
 }
 void send_values(){
-  int i;
-  float data1[4] = {76, 7000, 100, 14};
   readSensors();
   for(int i = 0; i <= 3; i++)
   {
