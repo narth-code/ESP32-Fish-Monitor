@@ -32,6 +32,9 @@ void setTime(int seconds);
 void send_values();
 void send_BT(int id, int value);
 void reset_rx_BT();
+
+void setTime(int minutes);
+void setFeedTime(int minutes);
 //void IRAM_ATTR setAutoFeed();
 //void IRAM_ATTR autoFeed();
 #endif
