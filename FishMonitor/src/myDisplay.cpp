@@ -6,9 +6,10 @@
 #include <Adafruit_SSD1305.h>
 #include <EasyButton.h>
 
-#include <LCD_Handler.h>
-#include <LCD_Icons.h>
-#include <Sensor_Handler.h>
+#include "LCD_Handler.h"
+#include "LCD_Icons.h"
+#include "Sensor_Handler.h"
+#include "Bluetooth_Handler.h"
 
 
 Adafruit_SSD1305 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
@@ -30,7 +31,11 @@ EasyButton rightButton(SW3_PIN);
 // Create an instance of the struct to hold our flags
 ButtonFlags flags = {false, false, false, false};
 
-
+extern int delayMinutes;
+extern hw_timer_t * timer3;
+extern int targetHour, targetMinute;
+extern volatile bool allowFeed;
+extern BluetoothSerial ESP_BT;
 void leftPressed()    
 {  
   Serial.println("LEFT pressed");
@@ -188,14 +193,61 @@ void displaySettingsPage() {
 
   display.display();
 }
+// MARK: DISPLAY FEED
+void displayFeedPage(){
+  
+
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(0,0);
+  display.print("Time:");
+  //display.setCursor(72,0);
+  //display.print(rtc.getHour());
+  display.printf("%02d:%02d:%02d",rtc.getHour(true), rtc.getMinute(), rtc.getSecond());
+
+  int remainingMinutes = timerReadSeconds(timer3) / 60;
+  //Serial.print(remainingMinutes);
+  display.setCursor(0,10);
+  display.print("Feed:");
+  display.printf("%02d:%02d (in %02d:%02d)" , targetHour % 12, targetMinute, rtc.getHour()-(targetHour%12),rtc.getMinute()-targetMinute);
+  // Button indicators
+  display.setTextColor(BLACK, WHITE);
+  display.drawBitmap(0, display.height()-7, ireturnArrow, 5, 7, WHITE);
+  display.setCursor(6,SCREEN_HEIGHT-7);
+  display.print(F("Back"));
+  display.drawLine(5, SCREEN_HEIGHT-7, 5, SCREEN_HEIGHT, WHITE);
+  display.setTextColor(WHITE);
+
+  // display.setTextColor(BLACK, WHITE);
+  // //display.drawLine(54,SCREEN_HEIGHT-11, 54, SCREEN_HEIGHT-4, WHITE);
+  // display.setCursor(50,SCREEN_HEIGHT-7);
+  // display.write(0x11); //◄
+  // display.write("|");
+  // display.write(0x10); //► 
+
+  display.setTextColor(WHITE);
+  display.setTextColor(BLACK, WHITE);
+  //display.drawLine(85,SCREEN_HEIGHT-11, 85, SCREEN_HEIGHT-4, WHITE); //This is for the formatting of the box
+  display.setCursor(72,SCREEN_HEIGHT-7);
+  display.print(F("Feed Now"));
+  display.setTextColor(WHITE);
+  //drawArrow(106,31);
+
+  display.display();
+
+}
 // MARK: DISPLAY BLUETOOTH
 void displayBluetoothSettings() {
   display.clearDisplay();
   display.setTextSize(1);
   display.setTextColor(WHITE);
   display.setCursor(0,0);
-  display.println(F("Connect ('Connected')"));
-  display.println(F("Disconnect"));
+  if (ESP_BT.hasClient()) {
+    display.println("Device is connected");
+  } else {
+    display.println("No device connected");
+  }
   display.display();
 }
 // MARK: DISPLAY MAINTENANCE
@@ -203,25 +255,29 @@ void displayMaintenanceSettings() {
   display.clearDisplay();
   display.setTextSize(1);
   display.setTextColor(WHITE);
-  display.setCursor(0,0);
+  display.setCursor(20,10);
   display.println(F("Reset Food Count"));
-  display.println(F("Clear Notification"));
 
+  display.setTextColor(BLACK, WHITE);
+  display.drawBitmap(0, display.height()-7, ireturnArrow, 5, 7, WHITE);
+  display.setCursor(6,SCREEN_HEIGHT-7);
+  display.print(F("Back"));
 
-  
-
-  display.clearDisplay();
-  display.drawBitmap(0, 0, MANTA_LOGO, 128, 32, WHITE);
-
+  display.setCursor(80,SCREEN_HEIGHT-7);
+  display.print(F("RESET"));
   
   display.display();
 }
+
+
 // MARK: toDISPLAY
 void toDisplay() {
 
     switch(currentScreen) {
         case MAIN_PAGE:
             displayMainPage(); break;
+        case FEED_PAGE:
+            displayFeedPage(); break;
         case SETTINGS_PAGE:
             displaySettingsPage(); break;
         case BLUETOOTH_SETTINGS:
@@ -233,7 +289,7 @@ void toDisplay() {
     handleButtons(); 
 }
 
-// MARK: handleBUttons
+// MARK: handleButtons
 void handleButtons() {
     switch(currentScreen) {
         case MAIN_PAGE:
@@ -242,8 +298,8 @@ void handleButtons() {
                 flags.b1 = false;
             }
             if (flags.b2) {
+                currentScreen = FEED_PAGE;
                 flags.b2 = false;
-                feed();
             }
             if (flags.b3) {
                 readSensors();
@@ -266,6 +322,29 @@ void handleButtons() {
                 flags.toggleSelect = false;
             }
             break;
+        case FEED_PAGE:
+            if (flags.b1) { // Return button
+                currentScreen = MAIN_PAGE;
+                flags.b1 = false;
+            }
+            if (flags.b2) { 
+                
+                flags.b2 = false;
+            }
+            if (flags.b3) {
+                allowFeed = true; 
+                feed();
+                flags.b3 = false;
+                
+                // display.clearDisplay();
+                // display.setTextSize(2);
+                // display.setTextColor(WHITE);
+                // display.setCursor(0,10);
+                // display.print("Feeding...");
+                // delayMicroseconds(1000);
+                //flags.toggleSelect = false;
+            }
+            break;
 
         case BLUETOOTH_SETTINGS:
             if (flags.b1) { // Return button
@@ -292,17 +371,14 @@ void handleButtons() {
                 flags.b2 = false;
             }
             if (flags.b3) {
-                // Implement refresh logic here
+                // Implement reset food cound
+                data[FOOD_COUNT] = 15;
                 flags.b3 = false;
+                currentScreen = SETTINGS_PAGE;
             }
             break;
 
         default:
             break;
     }
-}
-void drawArrow(uint8_t x, uint8_t y)
-{
-  display.drawLine(x, y, x+2, y, WHITE);
-  display.drawPixel(x+1, y-1, WHITE);
 }

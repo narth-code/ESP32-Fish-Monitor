@@ -24,13 +24,19 @@ hw_timer_t * timer1 = NULL;
 hw_timer_t * timer3 = NULL;
 portMUX_TYPE timerMux3 = portMUX_INITIALIZER_UNLOCKED;
 portMUX_TYPE timerMux1 = portMUX_INITIALIZER_UNLOCKED;
-
+int targetHour, targetMinute;
+// timer1 = NULL;
+// timer3 = NULL;
+// timerMux3 = portMUX_INITIALIZER_UNLOCKED;
+// timerMux1 = portMUX_INITIALIZER_UNLOCKED;
 
 int incoming;                           // variable to store byte received from phone 
 int id = -1;                            // received identification byte
 int val_byte1 = -1;                     // most significant byte of data value
 int val_byte2 = -1;  
-bool time_configured = false;
+volatile bool allowFeed = false;
+
+
 
 void setupBT() {
   ESP_BT.begin(">FishMonitor");        // Name of your Bluetooth interface -> will show up on your phone
@@ -45,8 +51,8 @@ void setupBT() {
     Serial.print(">The mac address using string: "); Serial.println(mac_str.c_str());
   #endif
 
-  timer1 = timerBegin(1, 80, true); // Timer 0, prescaler 80, count up
-  timer3 = timerBegin(3, 80, false);
+  timer1 = timerBegin(1, 40000, true); // Timer 0, prescaler 80, count up
+  timer3 = timerBegin(3, 40000, true);
 
   timerAttachInterrupt(timer1, &setAutoFeed, true); // Attach interrupt function
   timerAttachInterrupt(timer3, &autoFeed, true); // Attach interrupt function
@@ -73,7 +79,9 @@ void checkBluetooth() {
       float value =128*val_byte1 + val_byte2;
       //float value = (id == 5 || id == 7 ? 128*val_byte1 + val_byte2 : 0); // if it's time id, set the "seconds" value      
       switch (id) {
-          case 4: feed(); 
+          case 4: 
+            allowFeed = true; 
+            feed(); 
             break;
           case 5: setFeedTime(value); // set Time
             break;
@@ -96,25 +104,28 @@ void setTime(int minutes) {
   rtc.setTime(0, mins, hours, 1, 1, 2024); // Update RTC with new time, assume seconds are 0
   Serial.printf("Time updated to: %02d:%02d\n", hours, mins);
 }
-
+// MARK: TIME
 void setFeedTime(int minutes) {
-  int targetHour = minutes / 60;
-  int targetMinute = minutes % 60;
+  targetHour = minutes / 60;
+  targetMinute = minutes % 60;
 
-  int currentHour = rtc.getHour();
+  int currentHour = rtc.getHour(true);
   int currentMinute = rtc.getMinute();
 
   // Calculate delay until next feed time in minutes
   int currentTotalMinutes = currentHour * 60 + currentMinute;
   int delayMinutes;
-
-
-  if(minutes - currentTotalMinutes < 0){
-    // (12 * 60) - delayMinutes
+  Serial.print("current minutes"); Serial.println(currentTotalMinutes);
+  Serial.print("target minutes"); Serial.println(minutes);
+  //delayMinutes = minutes - currentTotalMinutes;
+  delayMinutes = (delayMinutes < 0? (currentTotalMinutes - minutes) + 720 : minutes - currentTotalMinutes);
+  Serial.print("delay minutes"); Serial.println(delayMinutes);
+  if(delayMinutes < 0){
+    delayMinutes = (currentTotalMinutes - minutes) + 720;
   }
   
-
-  timerAlarmWrite(timer1, delayMinutes * 60000000, false); // Set timer for the delay in microseconds (1 minute = 60,000,000 microseconds)
+  timerAlarmWrite(timer1, delayMinutes * 120000, false);
+  //timerAlarmWrite(timer1, delayMinutes * 60000000, false); // Set timer for the delay in microseconds (1 minute = 60,000,000 microseconds)
   timerAlarmEnable(timer1); // Enable timer
 
   
@@ -125,7 +136,8 @@ void setFeedTime(int minutes) {
 
 void IRAM_ATTR setAutoFeed() {
   portENTER_CRITICAL_ISR(&timerMux1);
-    timerAlarmWrite(timer3, 43200000000, true); // 12 hours in microseconds, auto-reload true
+    allowFeed = true;
+    timerAlarmWrite(timer3, 1440000, true); // 12 hours in microseconds, auto-reload true 43 200 000 000
     timerAlarmEnable(timer3);
   portEXIT_CRITICAL_ISR(&timerMux1);
 }
@@ -133,7 +145,7 @@ void IRAM_ATTR setAutoFeed() {
 void IRAM_ATTR autoFeed()
 {
   portENTER_CRITICAL_ISR(&timerMux3);
-    feed();
+    allowFeed = true;
   portEXIT_CRITICAL_ISR(&timerMux3);
 }
 void send_values(){

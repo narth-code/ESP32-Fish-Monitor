@@ -13,11 +13,15 @@
 // int val_byte2;                     // least significant byte of data value
 // =========================================
 
+
 // Time Tracking
 
 //bool time_configured;
-
-//ESP32Time rtc;
+// hw_timer_t * timer1;
+// hw_timer_t * timer3;
+// portMUX_TYPE timerMux3;
+// portMUX_TYPE timerMux1;
+extern ESP32Time rtc;
 //ESP32Time feed_time;
 // =========================================
 

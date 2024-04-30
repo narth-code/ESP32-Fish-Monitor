@@ -16,7 +16,7 @@ extern OneWire oneWire;
 
 //  PH   
 #define pH_PIN  32 //
-#define VOLTAGE 3.27
+#define VOLTAGE 3.3
 //  =========================================
 
 //  WATER LEVEL 

@@ -8,7 +8,7 @@ DallasTemperature tempSensor(&oneWire);
 
 Stepper myStepper(stepsPerRevolution, IN1, IN2, IN3, IN4);
 
-
+extern volatile bool allowFeed; 
 float data[4];
 
 
@@ -60,10 +60,11 @@ void readSensors() {
 void feed() {
 
   // step one segment:
-  if(data[FOOD_COUNT] > 0){
+  if((data[FOOD_COUNT] > 0) &&  allowFeed){
     Serial.print("Moving one segment: "); Serial.println(ONE_SERVING);
     myStepper.step(ONE_SERVING);
     data[FOOD_COUNT]--;
+    allowFeed = false;
   }
   else{
     Serial.println("Please refill Food");

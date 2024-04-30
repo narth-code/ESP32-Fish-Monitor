@@ -29,6 +29,7 @@ void toDisplay();
 
 void displayMainPage();
 void displaySettingsPage();
+void displayFeedPage();
 void displayBluetoothSettings();
 void displayMaintenanceSettings();
 
