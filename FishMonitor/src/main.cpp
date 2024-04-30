@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <gpio_viewer.h>
+//#include <gpio_viewer.h>
 #include <ESP32Time.h>
 #include "Sensor_Handler.h"
 #include "Bluetooth_Handler.h"
@@ -9,7 +9,7 @@
 
 //extern ESP32Time rtc, feed_time;
 
-unsigned long lastProbeReadTime = 0;
+unsigned long lastProbeReadTime;
 //GPIOViewer viewer;
 
 extern ButtonFlags flags;
@@ -26,10 +26,23 @@ void setup() {
 }
 
 void loop() {
+  extern volatile bool allowFeed;
+  unsigned long currentMillis = millis();  // Get the current time
 
-  
-  checkBluetooth();
-  toDisplay();
+  if (currentMillis - lastProbeReadTime >= 60000) {  // Compare the difference to the interval
+    lastProbeReadTime = currentMillis;  // Update the last time a reading was taken
+    Serial.println("Interval Read");
+    readSensors();  // Function to take a reading
+  }
+  else if ((currentMillis - lastProbeReadTime >= 6000))
+  {
+    checkBluetooth();
+    toDisplay();
 
+  }
+  if(allowFeed)
+  {
+    feed();
+  }
 
 }
