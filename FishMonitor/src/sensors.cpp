@@ -22,7 +22,7 @@ void setupSensors() {
   //digitalWrite(POWER_PIN, LOW); // turn the sensor OFF
 
   myStepper.setSpeed(10);
-  data[FOOD_COUNT] = 15;
+  data[FOOD_COUNT] = 14;
 
 }
 
@@ -61,7 +61,7 @@ void feed() {
 
   // step one segment:
   if((data[FOOD_COUNT] > 0) &&  allowFeed){
-    Serial.print("Moving one segment: "); Serial.println(ONE_SERVING);
+    Serial.print("Feeding... #"); Serial.println(data[FOOD_COUNT]);
     myStepper.step(ONE_SERVING);
     data[FOOD_COUNT]--;
     allowFeed = false;

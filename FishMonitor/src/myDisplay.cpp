@@ -112,7 +112,7 @@ void displayMainPage() {
   display.setCursor(64,10);
   display.print("Food:");
   display.print((int)data[FOOD_COUNT]);
-  display.print("/15");
+  display.print("/14");
 
   // Button indicators
   display.setTextColor(BLACK, WHITE);
@@ -210,7 +210,7 @@ void displayFeedPage(){
   //Serial.print(remainingMinutes);
   display.setCursor(0,10);
   display.print("Feed:");
-  display.printf("%02d:%02d (in %02d:%02d)" , targetHour % 12, targetMinute, rtc.getHour()-(targetHour%12),rtc.getMinute()-targetMinute);
+  display.printf("%02d:%02d (in %02d:%02d)" , targetHour % 12, targetMinute, rtc.getHour()-(targetHour%12),abs(rtc.getMinute()-targetMinute));
   // Button indicators
   display.setTextColor(BLACK, WHITE);
   display.drawBitmap(0, display.height()-7, ireturnArrow, 5, 7, WHITE);
@@ -248,6 +248,12 @@ void displayBluetoothSettings() {
   } else {
     display.println("No device connected");
   }
+  display.setTextColor(BLACK, WHITE);
+  display.drawBitmap(0, display.height()-7, ireturnArrow, 5, 7, WHITE);
+  display.setCursor(6,SCREEN_HEIGHT-7);
+  display.print(F("Back"));
+  display.drawLine(5, SCREEN_HEIGHT-7, 5, SCREEN_HEIGHT, WHITE);
+
   display.display();
 }
 // MARK: DISPLAY MAINTENANCE
@@ -256,14 +262,15 @@ void displayMaintenanceSettings() {
   display.setTextSize(1);
   display.setTextColor(WHITE);
   display.setCursor(20,10);
-  display.println(F("Reset Food Count"));
+  display.println(F("Reset Food Count?"));
 
   display.setTextColor(BLACK, WHITE);
   display.drawBitmap(0, display.height()-7, ireturnArrow, 5, 7, WHITE);
   display.setCursor(6,SCREEN_HEIGHT-7);
   display.print(F("Back"));
+  display.drawLine(5, SCREEN_HEIGHT-7, 5, SCREEN_HEIGHT, WHITE);
 
-  display.setCursor(80,SCREEN_HEIGHT-7);
+  display.setCursor(90,SCREEN_HEIGHT-7);
   display.print(F("RESET"));
   
   display.display();
@@ -287,6 +294,7 @@ void toDisplay() {
         default: break;
     }
     handleButtons(); 
+    delayMicroseconds(500);
 }
 
 // MARK: handleButtons
@@ -372,7 +380,7 @@ void handleButtons() {
             }
             if (flags.b3) {
                 // Implement reset food cound
-                data[FOOD_COUNT] = 15;
+                data[FOOD_COUNT] = 14;
                 flags.b3 = false;
                 currentScreen = SETTINGS_PAGE;
             }

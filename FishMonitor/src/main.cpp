@@ -23,6 +23,7 @@ void setup() {
   setupSensors();
   setupLCD();
   setupBT();
+  readSensors();
 }
 
 void loop() {
@@ -37,12 +38,12 @@ void loop() {
   else if ((currentMillis - lastProbeReadTime >= 6000))
   {
     checkBluetooth();
-    toDisplay();
 
   }
   if(allowFeed)
   {
     feed();
   }
+  toDisplay();
 
 }
