@@ -205,8 +205,16 @@ void displayFeedPage(){
   //display.setCursor(72,0);
   //display.print(rtc.getHour());
   display.printf("%02d:%02d:%02d",rtc.getHour(true), rtc.getMinute(), rtc.getSecond());
-
+  if (timerAlarmReadSeconds(timer3) != 0)
+  {
+    Serial.println(timerAlarmReadSeconds(timer3));
+  }
   int remainingMinutes = timerReadSeconds(timer3) / 60;
+
+  // if (timerReadSeconds(timer3) / 60 != 0)
+  // {
+  //   Serial.print(remainingMinutes);
+  // }
   //Serial.print(remainingMinutes);
   display.setCursor(0,10);
   display.print("Feed:");
@@ -219,12 +227,6 @@ void displayFeedPage(){
   display.drawLine(5, SCREEN_HEIGHT-7, 5, SCREEN_HEIGHT, WHITE);
   display.setTextColor(WHITE);
 
-  // display.setTextColor(BLACK, WHITE);
-  // //display.drawLine(54,SCREEN_HEIGHT-11, 54, SCREEN_HEIGHT-4, WHITE);
-  // display.setCursor(50,SCREEN_HEIGHT-7);
-  // display.write(0x11); //◄
-  // display.write("|");
-  // display.write(0x10); //► 
 
   display.setTextColor(WHITE);
   display.setTextColor(BLACK, WHITE);
