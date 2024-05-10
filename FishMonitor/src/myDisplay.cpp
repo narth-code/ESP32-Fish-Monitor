@@ -296,7 +296,7 @@ void toDisplay() {
         default: break;
     }
     handleButtons(); 
-    delayMicroseconds(500);
+    delayMicroseconds(100);
 }
 
 // MARK: handleButtons

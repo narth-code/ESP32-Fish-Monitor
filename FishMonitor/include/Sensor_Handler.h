@@ -46,7 +46,9 @@ void setupSensors();
 
 void readSensors(); 
 void feed();
+void autoFeed();
+void motorOff();
 
-void IRAM_ATTR setAutoFeed();
-void IRAM_ATTR autoFeed();
+void IRAM_ATTR startFeedTimer();
+void IRAM_ATTR onFeedTimer();
 #endif

@@ -58,16 +58,38 @@ void readSensors() {
 }
 
 void feed() {
-
   // step one segment:
-  if((data[FOOD_COUNT] > 0) &&  allowFeed){
+  if((data[FOOD_COUNT] > 0)){
     Serial.print("Feeding... #"); Serial.println(data[FOOD_COUNT]);
     myStepper.step(ONE_SERVING);
     data[FOOD_COUNT]--;
     allowFeed = false;
+    motorOff();
+    delayMicroseconds(10);
   }
   else{
     Serial.println("Please refill Food");
   }
 }
 
+void autoFeed() {
+  // step one segment:
+  if((data[FOOD_COUNT] > 0)){
+    Serial.print("Feeding... #"); Serial.println(data[FOOD_COUNT]);
+    myStepper.step(ONE_SERVING);
+    data[FOOD_COUNT]--;
+    allowFeed = false;
+    motorOff();
+    delayMicroseconds(10);
+  }
+  else{
+    Serial.println("Please refill Food");
+  }
+}
+
+void motorOff(){
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+}

@@ -54,8 +54,8 @@ void setupBT() {
   timer1 = timerBegin(1, 40000, true); // Timer 0, prescaler 80, count up
   timer3 = timerBegin(3, 40000, true);
 
-  timerAttachInterrupt(timer1, &setAutoFeed, true); // Attach interrupt function
-  timerAttachInterrupt(timer3, &autoFeed, true); // Attach interrupt function
+  timerAttachInterrupt(timer1, &startFeedTimer, true); // Attach interrupt function
+  timerAttachInterrupt(timer3, &onFeedTimer, true); // Attach interrupt function
 }
 
 
@@ -128,14 +128,14 @@ void setFeedTime(int minutes) {
   //timerAlarmWrite(timer1, delayMinutes * 60000000, false); // Set timer for the delay in microseconds (1 minute = 60,000,000 microseconds)
   timerAlarmEnable(timer1); // Enable timer
 
-  Serial.printf("Alarm Seconds: %02d\n", timerAlarmReadSeconds(timer1));
-  Serial.printf("Timer Seconds: %02d\n", timerReadSeconds(timer1));
+  // Serial.printf("Alarm Seconds: %02d\n", timerAlarmReadSeconds(timer1));
+  // Serial.printf("Timer Seconds: %02d\n", timerReadSeconds(timer1));
   //Serial.printf("Next feeding time set in %d minutes\n", delayMinutes);
   Serial.printf("Next feeding time set for %02d:%02d (in %d minutes)\n", targetHour, targetMinute, delayMinutes);
 }
 
 
-void IRAM_ATTR setAutoFeed() {
+void IRAM_ATTR startFeedTimer() {
   portENTER_CRITICAL_ISR(&timerMux1);
     allowFeed = true;
     timerAlarmWrite(timer3, 1440000*60, true); // 12 hours in microseconds, auto-reload true 43 200 000 000
@@ -143,7 +143,7 @@ void IRAM_ATTR setAutoFeed() {
   portEXIT_CRITICAL_ISR(&timerMux1);
 }
 
-void IRAM_ATTR autoFeed()
+void IRAM_ATTR onFeedTimer()
 {
   portENTER_CRITICAL_ISR(&timerMux3);
     allowFeed = true;
