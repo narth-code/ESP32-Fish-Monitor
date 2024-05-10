@@ -30,9 +30,9 @@ extern ESP32Time rtc;
 // Function Declarations
 void btAdvertisedDeviceFound(BTAdvertisedDevice* pDevice);
 void setupBT();
-void checkBluetooth();
+void checkBluetoothBuffer();
 
-void setTime(int seconds);
+
 void send_values();
 void send_BT(int id, int value);
 void reset_rx_BT();

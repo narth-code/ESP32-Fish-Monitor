@@ -257,6 +257,7 @@ void displayBluetoothSettings() {
   display.display();
 }
 // MARK: DISPLAY MAINTENANCE
+// todo: add the empty food reminder, do blinking "Food Empty, Please refill"
 void displayMaintenanceSettings() {
   display.clearDisplay();
   display.setTextSize(1);

@@ -37,7 +37,7 @@ void loop() {
   }
   else if ((currentMillis - lastProbeReadTime >= 6000))
   {
-    checkBluetooth();
+    checkBluetoothBuffer();
 
   }
   if(allowFeed)
