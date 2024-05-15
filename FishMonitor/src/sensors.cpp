@@ -23,6 +23,7 @@ void setupSensors() {
 
   myStepper.setSpeed(10);
   data[FOOD_COUNT] = 14;
+  motorOff();
 
 }
 

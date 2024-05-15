@@ -54,7 +54,7 @@ void setupBT() {
   timer1 = timerBegin(1, 40000, true); // Timer 0, prescaler 80, count up
   timer3 = timerBegin(3, 40000, true);
 
-  timerAttachInterrupt(timer1, &startFeedTimer, true); // Attach interrupt function
+  timerAttachInterrupt(timer1, &startFeedTimer, false); // Attach interrupt function
   timerAttachInterrupt(timer3, &onFeedTimer, true); // Attach interrupt function
 }
 
