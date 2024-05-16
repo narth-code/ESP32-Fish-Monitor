@@ -39,6 +39,7 @@ void reset_rx_BT();
 
 void setTime(int minutes);
 void setFeedTime(int minutes);
-//void IRAM_ATTR setAutoFeed();
-//void IRAM_ATTR autoFeed();
+int calculateShortestDelay(int currentTotalMinutes, int targetTotalMinutes);
+void IRAM_ATTR startFeedTimer();
+void IRAM_ATTR onFeedTimer();
 #endif

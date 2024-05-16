@@ -33,7 +33,7 @@ void readSensors() {
   //data[TEMP] = round(tempF*10) / 10;
   //digitalWrite(POWER_PIN,LOW);
   data[TEMP] = tempSensor.getTempFByIndex(0);
-  data[TEMP] = ((int)round(data[TEMP]*10))/10; // truncating to nearest 0.1
+  //data[TEMP] = ((int)round(data[TEMP]*10))/10; // truncating to nearest 0.1
   
     // Check if reading was successful
     //Serial.print("Temperature is: ");
@@ -50,7 +50,7 @@ void readSensors() {
   //digitalWrite(POWER_PIN, LOW);   // turn the sensor OFF
 
   
-  #ifndef DEBUG
+  #ifdef DEBUG
     Serial.print("TEMP: ");  Serial.println(data[TEMP]);
     Serial.print("PH: ");   Serial.println(data[PH]);  
     Serial.print("LEVEL: "); Serial.println(data[WATER_LEVEL]);
@@ -61,7 +61,7 @@ void readSensors() {
 void feed() {
   // step one segment:
   if((data[FOOD_COUNT] > 0)){
-    Serial.print("Feeding... #"); Serial.println(data[FOOD_COUNT]);
+    Serial.printf("Feeding... #%d\n",(int8_t)data[FOOD_COUNT]);
     myStepper.step(ONE_SERVING);
     data[FOOD_COUNT]--;
     allowFeed = false;
@@ -76,7 +76,7 @@ void feed() {
 void autoFeed() {
   // step one segment:
   if((data[FOOD_COUNT] > 0)){
-    Serial.print("Feeding... #"); Serial.println(data[FOOD_COUNT]);
+    Serial.printf("Auto Feeding... #%d\n",(int8_t)data[FOOD_COUNT]);
     myStepper.step(ONE_SERVING);
     data[FOOD_COUNT]--;
     allowFeed = false;

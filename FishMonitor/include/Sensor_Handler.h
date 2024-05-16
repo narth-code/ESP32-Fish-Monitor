@@ -49,6 +49,4 @@ void feed();
 void autoFeed();
 void motorOff();
 
-void IRAM_ATTR startFeedTimer();
-void IRAM_ATTR onFeedTimer();
 #endif

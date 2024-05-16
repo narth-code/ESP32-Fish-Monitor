@@ -31,6 +31,7 @@ EasyButton middleButton(SW2_PIN);
 EasyButton rightButton(SW3_PIN);
 // Create an instance of the struct to hold our flags
 ButtonFlags flags = {false, false, false, false};
+volatile bool screenOn = false;
 
 extern int delayMinutes;
 extern hw_timer_t * timer1;
@@ -59,6 +60,7 @@ void IRAM_ATTR buttonISR() {
   leftButton.read();
   middleButton.read();
   rightButton.read();
+  screenOn = true;
 }
 // MARK: SETUP
 void setupLCD() {
@@ -97,9 +99,8 @@ void displayMainPage() {
   display.setTextSize(1);
   display.setTextColor(WHITE);
   display.setCursor(0,0);
-  display.print("Temp:");
-  display.print(((int)round(data[TEMP]*10))/10);
-  display.print("F");
+  display.printf("Temp:%.1fF",data[TEMP]);
+
 
   display.setCursor(64,0);
   display.print("Level:");
@@ -119,28 +120,26 @@ void displayMainPage() {
 
   // Button indicators
   display.setTextColor(BLACK, WHITE);
-  display.setCursor(0,SCREEN_HEIGHT-11);
+  display.setCursor(0,SCREEN_HEIGHT-7);
   display.print("Settings");
-  //display.drawRect(i, i, display.width()-2*i, display.height()-2*i, WHITE);
   display.setTextColor(WHITE);
-  //display.print(" ");
+
 
   display.setTextColor(BLACK, WHITE);
-  //display.drawLine(54,SCREEN_HEIGHT-11, 54, SCREEN_HEIGHT-4, WHITE);
-  display.setCursor(52,SCREEN_HEIGHT-11);
+  display.drawLine(51,SCREEN_HEIGHT-7, 51, SCREEN_HEIGHT, WHITE);
+  display.setCursor(52,SCREEN_HEIGHT-7);
   display.print("Feed");
   
 
   display.setTextColor(WHITE);
-  //display.print(" ");
+
 
   display.setTextColor(BLACK, WHITE);
-  //display.drawLine(85,SCREEN_HEIGHT-11, 85, SCREEN_HEIGHT-4, WHITE);
-  display.setCursor(82,SCREEN_HEIGHT-11);
+  display.drawLine(81,SCREEN_HEIGHT-7, 81, SCREEN_HEIGHT, WHITE);
+  display.setCursor(82,SCREEN_HEIGHT-7);
   display.print("Refresh");
   display.setTextColor(WHITE);
-  //drawArrow(106,31);
-          //display.drawRoundRect(0,0,128,32,0,WHITE);
+
 
   display.display();
 }
@@ -162,14 +161,7 @@ void displaySettingsPage() {
 
   display.drawBitmap(65, 5, bluetooth_icon, 16, 16, WHITE);
   display.drawBitmap(100, 5, wrench_icon, 15, 15, WHITE);
-  /*
-  display.setTextColor(WHITE);
-  display.setCursor(55,0);
-  display.print(F("Bluetooth"));
 
-  display.setCursor(55,10);
-  display.print(F("Maintenance"));
-  */
 
   // Button indicators
   display.setTextColor(BLACK, WHITE);
@@ -180,7 +172,6 @@ void displaySettingsPage() {
   display.setTextColor(WHITE);
 
   display.setTextColor(BLACK, WHITE);
-  //display.drawLine(54,SCREEN_HEIGHT-11, 54, SCREEN_HEIGHT-4, WHITE);
   display.setCursor(50,SCREEN_HEIGHT-7);
   display.write(0x11); //◄
   display.write("|");
@@ -188,11 +179,11 @@ void displaySettingsPage() {
 
   display.setTextColor(WHITE);
   display.setTextColor(BLACK, WHITE);
-  //display.drawLine(85,SCREEN_HEIGHT-11, 85, SCREEN_HEIGHT-4, WHITE); //This is for the formatting of the box
+  display.drawLine(85,SCREEN_HEIGHT-7, 85, SCREEN_HEIGHT, WHITE); //This is for the formatting of the box
   display.setCursor(86,SCREEN_HEIGHT-7);
   display.print(F("Select"));
   display.setTextColor(WHITE);
-  //drawArrow(106,31);
+
 
   display.display();
 }
@@ -205,23 +196,15 @@ void displayFeedPage(){
   display.setTextColor(WHITE);
   display.setCursor(0,0);
   display.print("Time:");
-  //display.setCursor(72,0);
-  //display.print(rtc.getHour());
   display.printf("%02d:%02d:%02d",rtc.getHour(true), rtc.getMinute(), rtc.getSecond());
-  if (timerAlarmReadSeconds(timer3) != 0)
-  {
-    Serial.println(timerAlarmReadSeconds(timer3));
-  }
-  int remainingMinutes = timerReadSeconds(timer3) / 60;
+  display.printf(" (%d/14)", (int8_t)data[FOOD_COUNT]);
+  int remainingMinutes = (timerStarted(timer1) ? timerReadSeconds(timer1) : timerReadSeconds(timer3)) / 60;
 
-  // if (timerReadSeconds(timer3) / 60 != 0)
-  // {
-  //   Serial.print(remainingMinutes);
-  // }
-  //Serial.print(remainingMinutes);
+
   display.setCursor(0,10);
   display.print("Feed:");
-  display.printf("%02d:%02d (in %02d:%02d)" , targetHour % 12, targetMinute, rtc.getHour()-(targetHour%12),abs(rtc.getMinute()-targetMinute));
+  display.printf("%02d:%02d (in %02d:%02d)" , targetHour % 12, targetMinute, remainingMinutes /60, remainingMinutes % 60);
+  
   // Button indicators
   display.setTextColor(BLACK, WHITE);
   display.drawBitmap(0, display.height()-7, ireturnArrow, 5, 7, WHITE);
@@ -233,11 +216,11 @@ void displayFeedPage(){
 
   display.setTextColor(WHITE);
   display.setTextColor(BLACK, WHITE);
-  //display.drawLine(85,SCREEN_HEIGHT-11, 85, SCREEN_HEIGHT-4, WHITE); //This is for the formatting of the box
+  display.drawLine(71,SCREEN_HEIGHT-7, 71, SCREEN_HEIGHT, WHITE); //This is for the formatting of the box
   display.setCursor(72,SCREEN_HEIGHT-7);
   display.print(F("Feed Now"));
   display.setTextColor(WHITE);
-  //drawArrow(106,31);
+
 
   display.display();
 
@@ -251,21 +234,16 @@ void displayDebug(){
   display.setCursor(0,0);
   int sec1 = timerReadSeconds(timer1);
   display.print("Timer 1:");
-  display.printf("%02d:%02d:%02d", sec1/3600, sec1/60, sec1 %60);
+  display.printf("%02d:%02d:%02d", sec1/3600, (sec1/60)%60, sec1 %60);
+  display.print((timerAlarmEnabled(timer1) ? "!" : " "));
 
+  int sec2 = timerReadSeconds(timer3);
 
-  int sec2 = (timerStarted(timer3) ? timerReadSeconds(timer3):timerAlarmReadSeconds(timer3));
-  
-  // if (timerReadSeconds(timer3) / 60 != 0)
-  // {
-  //   Serial.print(remainingMinutes);
-  // }
-  //Serial.print(remainingMinutes);
 
   display.setCursor(0,10);
   display.print("Timer 3:");
-  display.printf("%02d:%02d:%02d", sec2/3600, sec2/60, sec2 %60);
-  
+  display.printf("%02d:%02d:%02d", sec2/3600, (sec2/60)%60, sec2 %60);
+  display.print((timerAlarmEnabled(timer3) ? "!" : " "));
 
   display.setCursor(105, 0);
   display.print((timerStarted(timer1) ? ">": " "));
@@ -310,7 +288,7 @@ void displayMaintenanceSettings() {
   display.clearDisplay();
   display.setTextSize(1);
   display.setTextColor(WHITE);
-  display.setCursor(20,10);
+  display.setCursor(13,10);
   display.println(F("Reset Food Count?"));
 
   display.setTextColor(BLACK, WHITE);
@@ -318,8 +296,9 @@ void displayMaintenanceSettings() {
   display.setCursor(6,SCREEN_HEIGHT-7);
   display.print(F("Back"));
   display.drawLine(5, SCREEN_HEIGHT-7, 5, SCREEN_HEIGHT, WHITE);
-
-  display.setCursor(90,SCREEN_HEIGHT-7);
+  
+  display.drawLine(91,SCREEN_HEIGHT-7, 91, SCREEN_HEIGHT, WHITE);
+  display.setCursor(92,SCREEN_HEIGHT-7);
   display.print(F("RESET"));
   
   display.display();
@@ -425,12 +404,11 @@ void handleButtons() {
                 currentScreen = SETTINGS_PAGE;
                 flags.b1 = false;
             }
-            if (flags.b2) { // Navigate
+            if (flags.b2) { 
                 // Add specific logic here if necessary
                 flags.b2 = false;
             }
             if (flags.b3) {
-                // Implement reset food cound
                 data[FOOD_COUNT] = 14;
                 flags.b3 = false;
                 currentScreen = SETTINGS_PAGE;
@@ -447,7 +425,8 @@ void handleButtons() {
                 flags.b2 = false;
             }
             if (flags.b3) {
-                
+                timerWrite(timer1,0.5 * 120000);
+                timerStart(timer1);
                 flags.b3 = false;
             }
             break;

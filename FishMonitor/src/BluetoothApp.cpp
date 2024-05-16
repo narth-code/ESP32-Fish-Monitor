@@ -1,24 +1,9 @@
-// --------------------------------------------------
-//
-// Code for control of ESP32 through MIT inventor app (Bluetooth). 
-// device used for tests: ESP32-WROOM-32D
-// 
-// App on phone has three buttons:
-// Button 1: 11 for ON and 10 for OFF
-// Button 2: 21 for ON and 20 for OFF
-// Button 3: 31 for ON and 30 for OFF
-//
-// Written by mo thunderz (last update: 20.4.2021)
-//
-// --------------------------------------------------
-
-// this header is needed for Bluetooth Serial -> works ONLY on ESP32
 #include "Bluetooth_Handler.h"
 
 // init Class:
 BluetoothSerial ESP_BT; 
 ESP32Time rtc;
-ESP32Time feed_time;
+
 
 hw_timer_t * timer1 = NULL;
 hw_timer_t * timer3 = NULL;
@@ -53,18 +38,21 @@ void setupBT() {
     Serial.print(">The mac address using string: "); Serial.println(mac_str.c_str());
   #endif
 
-  timer1 = timerBegin(1, 40000, true); // Timer 0, prescaler 80, count up
+  timer1 = timerBegin(1, 40000, false); // Timer 0, prescaler 80, count down
   timer3 = timerBegin(3, 40000, false); // count down
 
-  timerAlarmWrite(timer1, 0.2 * 120000, false);
-  timerAlarmWrite(timer3, 0, true); // 12 hours in microseconds, auto-reload true 43 200 000 000
+  //timerStop(timer1);
+  timerStop(timer3);
+
+  //timerWrite(timer1,0.5 * 120000);
+  timerWrite(timer3, 120000 * 60 * 12);
 
   timerAttachInterrupt(timer1, &startFeedTimer, true); // Attach interrupt function
   timerAttachInterrupt(timer3, &onFeedTimer, true); // Attach interrupt function
 
-  timerWrite(timer1,0);
-  timerWrite(timer3,0.3 * 120000);
-  timerStop(timer3);
+  timerAlarmWrite(timer1, 0, false);
+  timerAlarmWrite(timer3, 0, true); // 12 hours in microseconds, auto-reload
+
   timerAlarmEnable(timer1);
   timerAlarmEnable(timer3);
 }
@@ -91,7 +79,6 @@ void checkBluetooth() {
       //float value = (id == 5 || id == 7 ? 128*val_byte1 + val_byte2 : 0); // if it's time id, set the "seconds" value      
       switch (id) {
           case 4: 
-            allowFeed = true; 
             feed(); 
             break;
           case 5: setFeedTime(value); // set Time
@@ -125,31 +112,49 @@ void setFeedTime(int minutes) {
 
   // Calculate delay until next feed time in minutes
   int currentTotalMinutes = currentHour * 60 + currentMinute;
-  int delayMinutes;
-  Serial.print("current minutes"); Serial.println(currentTotalMinutes);
-  Serial.print("target minutes"); Serial.println(minutes);
-  //delayMinutes = minutes - currentTotalMinutes;
-  delayMinutes = (delayMinutes < 0? (currentTotalMinutes - minutes) + 720 : minutes - currentTotalMinutes);
-  Serial.print("delay minutes"); Serial.println(delayMinutes);
-  if(delayMinutes < 0){
-    delayMinutes = (currentTotalMinutes - minutes) + 720;
-  }
+  int delayMinutes= calculateShortestDelay(currentTotalMinutes, minutes);
   
-  timerAlarmWrite(timer1, delayMinutes * 120000, false);
+  
+  // Serial.print("current minutes"); Serial.println(currentTotalMinutes);
+  // Serial.print("target minutes"); Serial.println(minutes);
+  
+  // delayMinutes = ((minutes - currentTotalMinutes) < 0 ? (currentTotalMinutes - minutes) + 720 : minutes - currentTotalMinutes);
+  // Serial.print("delay minutes"); Serial.println(delayMinutes);
+  // if(delayMinutes < 0){
+  //   delayMinutes = (currentTotalMinutes - minutes) + 720;
+  // }
+  timerStop(timer3);
+  timerWrite(timer3,0.2 * 120000);
+
+  timerWrite(timer1, delayMinutes * 120000);
+  timerAlarmEnable(timer1);
+  timerStart(timer1);
   //timerAlarmWrite(timer1, delayMinutes * 60000000, false); // Set timer for the delay in microseconds (1 minute = 60,000,000 microseconds)
-  timerAlarmEnable(timer1); // Enable timer
+
 
   // Serial.printf("Alarm Seconds: %02d\n", timerAlarmReadSeconds(timer1));
   // Serial.printf("Timer Seconds: %02d\n", timerReadSeconds(timer1));
   //Serial.printf("Next feeding time set in %d minutes\n", delayMinutes);
-  Serial.printf("Next feeding time set for %02d:%02d (in %d minutes)\n", targetHour, targetMinute, delayMinutes);
+  Serial.printf("Next feeding time set for %02d:%02d (in %d minutes)\n", minutes/60, minutes%60, delayMinutes);
 }
 
+int calculateShortestDelay(int currentTotalMinutes, int targetTotalMinutes) {
+    // Calculate forward delay to the target time
+    int forwardDelay = (targetTotalMinutes - currentTotalMinutes + 1440) % 1440;
 
+    // Calculate forward delay to the target time plus 12 hours (720 minutes)
+    int targetPlus12Hours = (targetTotalMinutes + 720) % 1440;
+    int forwardDelayPlus12Hours = (targetPlus12Hours - currentTotalMinutes + 1440) % 1440;
+
+    // Return the smallest of the two delays
+    return min(forwardDelay,forwardDelayPlus12Hours);
+}
 void IRAM_ATTR startFeedTimer() {
   portENTER_CRITICAL_ISR(&timerMux1);
     tFlags[0] = true;
+
     timerStop(timer1);
+    timerRestart(timer1); // Restarting writes timer value to 0
     allowFeed = true;
     timerStart(timer3);
 
@@ -167,6 +172,7 @@ void IRAM_ATTR onFeedTimer()
     allowFeed = true;
   portEXIT_CRITICAL_ISR(&timerMux3);
 }
+
 void send_values(){
   readSensors();
   for(int i = 0; i <= 3; i++)
