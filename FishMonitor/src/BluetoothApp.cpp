@@ -41,17 +41,17 @@ void setupBT() {
   timer1 = timerBegin(1, 40000, false); // Timer 0, prescaler 80, count down
   timer3 = timerBegin(3, 40000, false); // count down
 
-  //timerStop(timer1);
+  timerStop(timer1);
   timerStop(timer3);
 
-  //timerWrite(timer1,0.5 * 120000);
+  timerWrite(timer1,0);
   timerWrite(timer3, 120000 * 60 * 12);
 
   timerAttachInterrupt(timer1, &startFeedTimer, true); // Attach interrupt function
   timerAttachInterrupt(timer3, &onFeedTimer, true); // Attach interrupt function
 
-  timerAlarmWrite(timer1, 0, false);
-  timerAlarmWrite(timer3, 0, true); // 12 hours in microseconds, auto-reload
+  timerAlarmWrite(timer1, 0, false);// write value for alarm to trigger, no auto-reload
+  timerAlarmWrite(timer3, 0, true); // write value for alarm to trigger, auto-reload
 
   timerAlarmEnable(timer1);
   timerAlarmEnable(timer3);
@@ -111,8 +111,7 @@ void setFeedTime(int minutes) {
   int currentMinute = rtc.getMinute();
 
   // Calculate delay until next feed time in minutes
-  int currentTotalMinutes = currentHour * 60 + currentMinute;
-  int delayMinutes= calculateShortestDelay(currentTotalMinutes, minutes);
+  int delayMinutes= calculateShortestDelay((currentHour * 60 + currentMinute), minutes);
   
   
   // Serial.print("current minutes"); Serial.println(currentTotalMinutes);
@@ -123,19 +122,15 @@ void setFeedTime(int minutes) {
   // if(delayMinutes < 0){
   //   delayMinutes = (currentTotalMinutes - minutes) + 720;
   // }
-  timerStop(timer3);
-  timerWrite(timer3,0.2 * 120000);
+  timerStop(timer3); 
+  timerWrite(timer3, 0.2 * 120000); // reset 12hr value
 
   timerWrite(timer1, delayMinutes * 120000);
-  timerAlarmEnable(timer1);
+  timerAlarmEnable(timer1); // since reload is off, the alarm will not retrigger if new value is written into 
   timerStart(timer1);
-  //timerAlarmWrite(timer1, delayMinutes * 60000000, false); // Set timer for the delay in microseconds (1 minute = 60,000,000 microseconds)
 
 
-  // Serial.printf("Alarm Seconds: %02d\n", timerAlarmReadSeconds(timer1));
-  // Serial.printf("Timer Seconds: %02d\n", timerReadSeconds(timer1));
-  //Serial.printf("Next feeding time set in %d minutes\n", delayMinutes);
-  Serial.printf("Next feeding time set for %02d:%02d (in %d minutes)\n", minutes/60, minutes%60, delayMinutes);
+  //Serial.printf("Next feeding time set for %02d:%02d (in %d minutes)\n", minutes/60, minutes%60, delayMinutes);
 }
 
 int calculateShortestDelay(int currentTotalMinutes, int targetTotalMinutes) {
@@ -155,13 +150,10 @@ void IRAM_ATTR startFeedTimer() {
 
     timerStop(timer1);
     timerRestart(timer1); // Restarting writes timer value to 0
+    
     allowFeed = true;
     timerStart(timer3);
 
-  
-  /*allowFeed = true;
-    timerAlarmWrite(timer3, 1440000*60, true); // 12 hours in microseconds, auto-reload true 43 200 000 000
-    timerAlarmEnable(timer3); */
   portEXIT_CRITICAL_ISR(&timerMux1);
 }
 
