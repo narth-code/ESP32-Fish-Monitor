@@ -56,15 +56,17 @@ void setupBT() {
   timer1 = timerBegin(1, 40000, true); // Timer 0, prescaler 80, count up
   timer3 = timerBegin(3, 40000, false); // count down
 
-  timerAlarmWrite(timer3, 0, true); // 12 hours in microseconds, auto-reload true 43 200 000 000
   timerAlarmWrite(timer1, 0.2 * 120000, false);
+  timerAlarmWrite(timer3, 0, true); // 12 hours in microseconds, auto-reload true 43 200 000 000
 
   timerAttachInterrupt(timer1, &startFeedTimer, true); // Attach interrupt function
   timerAttachInterrupt(timer3, &onFeedTimer, true); // Attach interrupt function
 
   timerWrite(timer1,0);
-  //timerStop(timer3);
+  timerWrite(timer3,0.3 * 120000);
+  timerStop(timer3);
   timerAlarmEnable(timer1);
+  timerAlarmEnable(timer3);
 }
 
 
@@ -149,8 +151,8 @@ void IRAM_ATTR startFeedTimer() {
     tFlags[0] = true;
     timerStop(timer1);
     allowFeed = true;
-    timerWrite(timer3,0.3 * 120000);
-    timerAlarmEnable(timer3);
+    timerStart(timer3);
+
   
   /*allowFeed = true;
     timerAlarmWrite(timer3, 1440000*60, true); // 12 hours in microseconds, auto-reload true 43 200 000 000
