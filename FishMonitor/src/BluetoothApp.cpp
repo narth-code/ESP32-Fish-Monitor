@@ -34,7 +34,9 @@ int incoming;                           // variable to store byte received from 
 int id = -1;                            // received identification byte
 int val_byte1 = -1;                     // most significant byte of data value
 int val_byte2 = -1;  
+
 volatile bool allowFeed = false;
+volatile bool tFlags[2] = {false};
 
 
 
@@ -52,10 +54,17 @@ void setupBT() {
   #endif
 
   timer1 = timerBegin(1, 40000, true); // Timer 0, prescaler 80, count up
-  timer3 = timerBegin(3, 40000, true);
+  timer3 = timerBegin(3, 40000, false); // count down
 
-  timerAttachInterrupt(timer1, &startFeedTimer, false); // Attach interrupt function
+  timerAlarmWrite(timer3, 0, true); // 12 hours in microseconds, auto-reload true 43 200 000 000
+  timerAlarmWrite(timer1, 0.2 * 120000, false);
+
+  timerAttachInterrupt(timer1, &startFeedTimer, true); // Attach interrupt function
   timerAttachInterrupt(timer3, &onFeedTimer, true); // Attach interrupt function
+
+  timerWrite(timer1,0);
+  timerStop(timer3);
+  timerAlarmEnable(timer1);
 }
 
 
@@ -137,15 +146,22 @@ void setFeedTime(int minutes) {
 
 void IRAM_ATTR startFeedTimer() {
   portENTER_CRITICAL_ISR(&timerMux1);
+    tFlags[0] = true;
+    timerStop(timer1);
     allowFeed = true;
-    timerAlarmWrite(timer3, 1440000*60, true); // 12 hours in microseconds, auto-reload true 43 200 000 000
+    timerWrite(timer3,0.3 * 120000);
     timerAlarmEnable(timer3);
+  
+  /*allowFeed = true;
+    timerAlarmWrite(timer3, 1440000*60, true); // 12 hours in microseconds, auto-reload true 43 200 000 000
+    timerAlarmEnable(timer3); */
   portEXIT_CRITICAL_ISR(&timerMux1);
 }
 
 void IRAM_ATTR onFeedTimer()
 {
   portENTER_CRITICAL_ISR(&timerMux3);
+    tFlags[1] = true;
     allowFeed = true;
   portEXIT_CRITICAL_ISR(&timerMux3);
 }

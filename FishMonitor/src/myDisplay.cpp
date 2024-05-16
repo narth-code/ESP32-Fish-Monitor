@@ -20,7 +20,8 @@ enum{
   SETTINGS_PAGE,
   BLUETOOTH_SETTINGS, 
   MAINTENANCE_SETTINGS,
-  FEED_PAGE
+  FEED_PAGE,
+  DEBUG_PAGE
 };
 u_int8_t currentScreen= MAIN_PAGE;
 
@@ -32,9 +33,11 @@ EasyButton rightButton(SW3_PIN);
 ButtonFlags flags = {false, false, false, false};
 
 extern int delayMinutes;
+extern hw_timer_t * timer1;
 extern hw_timer_t * timer3;
 extern int targetHour, targetMinute;
 extern volatile bool allowFeed;
+extern volatile bool tFlags[2];
 extern BluetoothSerial ESP_BT;
 void leftPressed()    
 {  
@@ -239,6 +242,43 @@ void displayFeedPage(){
   display.display();
 
 }
+
+// MARK: DEBUG
+void displayDebug(){
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(0,0);
+  int sec1 = timerReadSeconds(timer1);
+  display.print("Timer 1:  ");
+  display.printf("%02d:%02d:%02d", sec1/3600, sec1/60, sec1 %60);
+
+
+  int sec2 = timerReadSeconds(timer3);
+
+  // if (timerReadSeconds(timer3) / 60 != 0)
+  // {
+  //   Serial.print(remainingMinutes);
+  // }
+  //Serial.print(remainingMinutes);
+
+  display.setCursor(0,10);
+  display.print("Timer 3:  ");
+  display.printf("%02d:%02d:%02d", sec2/3600, sec2/60, sec2 %60);
+  display.setTextColor(BLACK, WHITE);
+  display.drawBitmap(0, display.height()-7, ireturnArrow, 5, 7, WHITE);
+  display.setCursor(6,SCREEN_HEIGHT-7);
+  display.print(F("Back"));
+  display.drawLine(5, SCREEN_HEIGHT-7, 5, SCREEN_HEIGHT, WHITE);
+  display.setTextColor(WHITE);
+
+  display.setCursor(120, 0);
+  display.print((tFlags[0] ? "1": "X"));
+  display.setCursor(120, 10);
+  display.print((tFlags[1] ? "3": "X"));
+ 
+  display.display();
+}
 // MARK: DISPLAY BLUETOOTH
 void displayBluetoothSettings() {
   display.clearDisplay();
@@ -293,10 +333,12 @@ void toDisplay() {
             displayBluetoothSettings(); break;
         case MAINTENANCE_SETTINGS:
             displayMaintenanceSettings(); break;
+        case DEBUG_PAGE:
+            displayDebug(); break;
         default: break;
     }
     handleButtons(); 
-    delayMicroseconds(100);
+    delayMicroseconds(10);
 }
 
 // MARK: handleButtons
@@ -338,7 +380,7 @@ void handleButtons() {
                 flags.b1 = false;
             }
             if (flags.b2) { 
-                
+                currentScreen = DEBUG_PAGE;
                 flags.b2 = false;
             }
             if (flags.b3) {
@@ -355,7 +397,7 @@ void handleButtons() {
                 //flags.toggleSelect = false;
             }
             break;
-
+  
         case BLUETOOTH_SETTINGS:
             if (flags.b1) { // Return button
                 currentScreen = SETTINGS_PAGE;
@@ -387,7 +429,19 @@ void handleButtons() {
                 currentScreen = SETTINGS_PAGE;
             }
             break;
-
+        case DEBUG_PAGE:
+            if (flags.b1) { // Return button
+                
+                flags.b1 = false;
+            }
+            if (flags.b2) { 
+                currentScreen = FEED_PAGE;
+                flags.b2 = false;
+            }
+            if (flags.b3) {
+                flags.b3 = false;
+            }
+            break;
         default:
             break;
     }

@@ -32,7 +32,7 @@ void displaySettingsPage();
 void displayFeedPage();
 void displayBluetoothSettings();
 void displayMaintenanceSettings();
-
+void displayDebug();
 void handleButtons();
 // void handleMainPageButtons();
 // void handleSettingsPageButtons();
