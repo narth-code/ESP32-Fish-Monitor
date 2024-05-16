@@ -404,13 +404,13 @@ void handleButtons() {
                 flags.b1 = false;
             }
             if (flags.b2) { 
-                timerStop(timer1);
-                timerStop(timer3);
+                //timerStop(timer1);
+                //timerStop(timer3);
                 flags.b2 = false;
             }
             if (flags.b3) {
-                timerWrite(timer1,0.5 * 120000);
-                timerStart(timer1);
+                //timerWrite(timer1,0.5 * 120000);
+                //timerStart(timer1);
                 flags.b3 = false;
             }
             break;
