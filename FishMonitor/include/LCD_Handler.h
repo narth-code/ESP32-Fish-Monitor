@@ -1,6 +1,15 @@
 #ifndef LCD_HANDLER_H
 #define LCD_HANDLER_H
 
+#include <Arduino.h>
+
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1305.h>
+#include <EasyButton.h>
+
+
+
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 32
@@ -16,6 +25,8 @@
 #define DEBOUNCE_MS 200
 #define screenDimTime  60000 // 60000 ms = 1 minute
 
+extern Adafruit_SSD1305 display;
+
 struct ButtonFlags {
   volatile bool b1;
   volatile bool b2;
@@ -23,6 +34,16 @@ struct ButtonFlags {
   volatile bool toggleSelect;  
 };
 
+enum{
+  MAIN_PAGE,
+  SETTINGS_PAGE,
+  BLUETOOTH_SETTINGS, 
+  MAINTENANCE_SETTINGS,
+  FEED_PAGE,
+  DEBUG_PAGE,
+  SCREEN_OFF
+};
+extern u_int8_t currentScreen;
 
 void setupLCD();
 void toDisplay();
@@ -38,6 +59,5 @@ void handleButtons();
 // void handleSettingsPageButtons();
 // void handleBluetoothPageButtons();
 // void handleMaintenancePageButtons();
-extern void drawArrow(uint8_t x, uint8_t y);
 void IRAM_ATTR buttonISR();
 #endif

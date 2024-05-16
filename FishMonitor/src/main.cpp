@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <gpio_viewer.h>
 #include <ESP32Time.h>
 
 #include "Sensor_Handler.h"
@@ -13,16 +12,15 @@
 
 //extern ESP32Time rtc, feed_time;
 
-unsigned long lastProbeReadTime;
-GPIOViewer viewer;
+
+unsigned long lastProbeReadTime, lastScreenTime;
 
 extern ButtonFlags flags;
 extern float data[4];
 void setup() {
 
   Serial.begin(BAUD);
-  viewer.connectToWifi(WIFI_SSID ,WIFI_PASS);
-  viewer.begin();
+
 
   setupSensors();
   setupLCD();
@@ -31,7 +29,8 @@ void setup() {
 }
 
 void loop() {
-  extern volatile bool allowFeed;
+  extern volatile bool allowFeed, screenOn;
+
   unsigned long currentMillis = millis();  // Get the current time
 
   if (currentMillis - lastProbeReadTime >= 60000) {  // Compare the difference to the interval
@@ -44,11 +43,26 @@ void loop() {
     checkBluetooth();
 
   }
+  if(screenOn){ // keep track how long screen has been on using flag from buttonISR
+    lastScreenTime = currentMillis;
+    screenOn = false;
+  }
+  if(currentMillis - lastScreenTime <= 60000){
+    toDisplay();
+  }
+  else{
+    display.clearDisplay();
+    display.display();
+    display.sleep();
+    
+    currentScreen = SCREEN_OFF;
+  }
+
+
   if(allowFeed)
   {
     autoFeed();
   }
-  toDisplay();
 
   delayMicroseconds(10);
 }

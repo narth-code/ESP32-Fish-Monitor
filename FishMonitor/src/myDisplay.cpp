@@ -1,37 +1,18 @@
-#include <Arduino.h>
-
-
-#include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1305.h>
-#include <EasyButton.h>
-
 #include "LCD_Handler.h"
-#include "LCD_Icons.h"
 #include "Sensor_Handler.h"
 #include "Bluetooth_Handler.h"
-
+#include "LCD_Icons.h"
 
 Adafruit_SSD1305 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-
-enum{
-  MAIN_PAGE,
-  SETTINGS_PAGE,
-  BLUETOOTH_SETTINGS, 
-  MAINTENANCE_SETTINGS,
-  FEED_PAGE,
-  DEBUG_PAGE
-};
-u_int8_t currentScreen= MAIN_PAGE;
-
+u_int8_t currentScreen = MAIN_PAGE;
 
 EasyButton leftButton(SW1_PIN);
 EasyButton middleButton(SW2_PIN);
 EasyButton rightButton(SW3_PIN);
 // Create an instance of the struct to hold our flags
 ButtonFlags flags = {false, false, false, false};
-volatile bool screenOn = false;
+volatile bool screenOn = true;
 
 extern int delayMinutes;
 extern hw_timer_t * timer1;
@@ -126,8 +107,8 @@ void displayMainPage() {
 
 
   display.setTextColor(BLACK, WHITE);
-  display.drawLine(51,SCREEN_HEIGHT-7, 51, SCREEN_HEIGHT, WHITE);
-  display.setCursor(52,SCREEN_HEIGHT-7);
+  display.drawLine(52,SCREEN_HEIGHT-7, 52, SCREEN_HEIGHT, WHITE);
+  display.setCursor(53,SCREEN_HEIGHT-7);
   display.print("Feed");
   
 
@@ -321,6 +302,9 @@ void toDisplay() {
             displayMaintenanceSettings(); break;
         case DEBUG_PAGE:
             displayDebug(); break;
+        case SCREEN_OFF:
+            display.wake();
+            break;
         default: break;
     }
     handleButtons(); 
@@ -427,6 +411,20 @@ void handleButtons() {
             if (flags.b3) {
                 timerWrite(timer1,0.5 * 120000);
                 timerStart(timer1);
+                flags.b3 = false;
+            }
+            break;
+        case SCREEN_OFF:
+            if (flags.b1) {
+                currentScreen = MAIN_PAGE;
+                flags.b1 = false;
+            }
+            if (flags.b2) {
+                currentScreen = MAIN_PAGE;
+                flags.b2 = false;
+            }
+            if (flags.b3) {
+                currentScreen = MAIN_PAGE;
                 flags.b3 = false;
             }
             break;

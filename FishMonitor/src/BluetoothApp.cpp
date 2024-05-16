@@ -123,7 +123,7 @@ void setFeedTime(int minutes) {
   //   delayMinutes = (currentTotalMinutes - minutes) + 720;
   // }
   timerStop(timer3); 
-  timerWrite(timer3, 0.2 * 120000); // reset 12hr value
+  timerWrite(timer3, 120000 * 60 * 12); // reset 12hr value
 
   timerWrite(timer1, delayMinutes * 120000);
   timerAlarmEnable(timer1); // since reload is off, the alarm will not retrigger if new value is written into 
