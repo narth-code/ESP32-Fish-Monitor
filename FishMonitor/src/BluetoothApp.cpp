@@ -63,7 +63,7 @@ void setupBT() {
   timerAttachInterrupt(timer3, &onFeedTimer, true); // Attach interrupt function
 
   timerWrite(timer1,0);
-  timerStop(timer3);
+  //timerStop(timer3);
   timerAlarmEnable(timer1);
 }
 

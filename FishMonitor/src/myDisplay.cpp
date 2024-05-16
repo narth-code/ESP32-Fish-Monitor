@@ -250,12 +250,12 @@ void displayDebug(){
   display.setTextColor(WHITE);
   display.setCursor(0,0);
   int sec1 = timerReadSeconds(timer1);
-  display.print("Timer 1:  ");
+  display.print("Timer 1:");
   display.printf("%02d:%02d:%02d", sec1/3600, sec1/60, sec1 %60);
 
 
-  int sec2 = timerReadSeconds(timer3);
-
+  int sec2 = (timerStarted(timer3)? timerReadSeconds(timer3): 0);
+  
   // if (timerReadSeconds(timer3) / 60 != 0)
   // {
   //   Serial.print(remainingMinutes);
@@ -263,7 +263,7 @@ void displayDebug(){
   //Serial.print(remainingMinutes);
 
   display.setCursor(0,10);
-  display.print("Timer 3:  ");
+  display.print("Timer 3:");
   display.printf("%02d:%02d:%02d", sec2/3600, sec2/60, sec2 %60);
   display.setTextColor(BLACK, WHITE);
   display.drawBitmap(0, display.height()-7, ireturnArrow, 5, 7, WHITE);
@@ -271,6 +271,11 @@ void displayDebug(){
   display.print(F("Back"));
   display.drawLine(5, SCREEN_HEIGHT-7, 5, SCREEN_HEIGHT, WHITE);
   display.setTextColor(WHITE);
+
+  display.setCursor(111, 0);
+  display.print((timerStarted(timer1) ? "»": " "));
+  display.setCursor(111, 10);
+  display.print((timerStarted(timer3) ? "»": " "));
 
   display.setCursor(120, 0);
   display.print((tFlags[0] ? "1": "X"));
@@ -439,6 +444,7 @@ void handleButtons() {
                 flags.b2 = false;
             }
             if (flags.b3) {
+                timerRestart(timer1);
                 flags.b3 = false;
             }
             break;
