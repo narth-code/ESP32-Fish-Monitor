@@ -254,7 +254,7 @@ void displayDebug(){
   display.printf("%02d:%02d:%02d", sec1/3600, sec1/60, sec1 %60);
 
 
-  int sec2 = (timerStarted(timer3)? timerReadSeconds(timer3): 0);
+  int sec2 = (timerStarted(timer3) ?  timerAlarmReadSeconds(timer3) :timerReadSeconds(timer3));
   
   // if (timerReadSeconds(timer3) / 60 != 0)
   // {
@@ -265,6 +265,18 @@ void displayDebug(){
   display.setCursor(0,10);
   display.print("Timer 3:");
   display.printf("%02d:%02d:%02d", sec2/3600, sec2/60, sec2 %60);
+  
+
+  display.setCursor(111, 0);
+  display.print((timerStarted(timer1) ? "►": " "));
+  display.setCursor(111, 10);
+  display.print((timerStarted(timer3) ? "►": " "));
+
+  display.setCursor(120, 0);
+  display.print((tFlags[0] ? "1": "X"));
+  display.setCursor(120, 10);
+  display.print((tFlags[1] ? "3": "X"));
+  
   display.setTextColor(BLACK, WHITE);
   display.drawBitmap(0, display.height()-7, ireturnArrow, 5, 7, WHITE);
   display.setCursor(6,SCREEN_HEIGHT-7);
@@ -272,16 +284,6 @@ void displayDebug(){
   display.drawLine(5, SCREEN_HEIGHT-7, 5, SCREEN_HEIGHT, WHITE);
   display.setTextColor(WHITE);
 
-  display.setCursor(111, 0);
-  display.print((timerStarted(timer1) ? "»": " "));
-  display.setCursor(111, 10);
-  display.print((timerStarted(timer3) ? "»": " "));
-
-  display.setCursor(120, 0);
-  display.print((tFlags[0] ? "1": "X"));
-  display.setCursor(120, 10);
-  display.print((tFlags[1] ? "3": "X"));
- 
   display.display();
 }
 // MARK: DISPLAY BLUETOOTH
@@ -436,11 +438,10 @@ void handleButtons() {
             break;
         case DEBUG_PAGE:
             if (flags.b1) { // Return button
-                
+                currentScreen = FEED_PAGE;
                 flags.b1 = false;
             }
             if (flags.b2) { 
-                currentScreen = FEED_PAGE;
                 flags.b2 = false;
             }
             if (flags.b3) {
